@@ -26,8 +26,8 @@ using namespace Eigen; // objects VectorXd, MatrixXd
 
 
 
-//VectorXi proportions(double diff_conc, int n_seed) {
-int  main(){
+VectorXi proportions(int n_seed) {
+//int  main(){
 
 
 // parameters
@@ -42,19 +42,20 @@ int  main(){
 
     double space_grid_controller = 100.0;
 
-    double domain_length = 11.0; //this variable is for the actual domain length, since it will be increasing
+    double domain_length = 3.0; //this variable is for the actual domain length, since it will be increasing
     double Lt_old = domain_length;
     int length_x =
             int(domain_length) * int(space_grid_controller); // length in x direction of the chemoattractant matrix
     double initial_domain_length = domain_length;
-    const int length_y = int(1.2 * space_grid_controller); // length in y direction of the chemoattractant matrix
+    int real_length_y = 120;
+    const int length_y = int(1.8 * space_grid_controller); // length in y direction of the chemoattractant matrix
     const double final_time = 72; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
 
 // parameters for the dynamics of chemoattractant concentration
 
     double D = 0.0002;//0.00001;//0.05; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0.0; // initialise time
-    double dt = 0.01; // time step
+    double dt = 0.05; // time step
     double dt_init = dt;
     int number_time = int(1 / dt_init); // how many timesteps in 1min, which is the actual simulation timestep
     double dx = 1.0 / space_grid_controller; // space step in x direction, double to be consistent with other types
@@ -79,7 +80,7 @@ int  main(){
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
-    double speed_l = 45.0/60.0;//10 * 0.05;// 0.05;//1;//0.05; // speed of a leader cell
+    double speed_l = 70.0/60.0;//10 * 0.05;// 0.05;//1;//0.05; // speed of a leader cell
     double increase_fol_speed = 1.3;
     double speed_f = increase_fol_speed * speed_l;//0.05;//0.1;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
@@ -98,7 +99,7 @@ int  main(){
     int leader_track;
 
 
-     int n_seed = 0;
+     //int n_seed = 0;
      double diff_conc = 0.05;
 
 
@@ -265,7 +266,12 @@ int  main(){
 
     // initialise random number generator for particles entering the domain, appearing at the start in x and uniformly in y
     std::default_random_engine gen;
-    std::uniform_real_distribution<double> uniform(cell_radius, length_y - 1 - cell_radius);
+   // std::uniform_real_distribution<double> uniform(cell_radius + , length_y - 1 - cell_radius);
+
+    //for double length
+    std::uniform_real_distribution<double> uniform(cell_radius+ double(real_length_y)/2, length_y - double(real_length_y)/2 -1 - cell_radius);
+
+
 
 
     /*
@@ -279,8 +285,14 @@ int  main(){
         get<type>(particles[i]) = 0; // initially all cells are leaders
 
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        get<position>(particles[i]) = vdouble2(cell_radius, (i + 1) * double(length_y - 1) / double(N) -
-                                                            0.5 * double(length_y - 1) /
+
+//        get<position>(particles[i]) = vdouble2(cell_radius, (i + 1) * double(length_y - 1) / double(N) -
+//                                                            0.5 * double(length_y - 1) /
+//                                                            double(N)); // x=2, uniformly in y
+
+        // for double length
+        get<position>(particles[i]) = vdouble2(cell_radius, real_length_y/4 + (i + 1) * double(real_length_y - 1) / double(N) -
+                                                            0.5 * double(real_length_y - 1) /
                                                             double(N)); // x=2, uniformly in y
         get<persistence_extent>(particles[i]) = 0;
         get<same_dir_step>(particles[i]) = 0;
@@ -297,8 +309,11 @@ int  main(){
     // initialise random number generator to obtain random number between 0 and 2*pi
     std::default_random_engine gen1;
     gen1.seed(t * n_seed); // choose different seeds to obtain different random numbers
-    std::uniform_real_distribution<double> uniformpi(-M_PI/3,M_PI/3 +  M_PI); // 0 to up, M_PI/2 move straigth M_PI downt
+    //std::uniform_real_distribution<double> uniformpi(-M_PI/3.5,M_PI/3.5 +  M_PI); // 0 to up, M_PI/2 move straigth M_PI downt
 
+    //std::normal_distribution<double> uniformpi(M_PI/2,2); // mean 0 variance 1
+
+    std::uniform_real_distribution<double> uniformpi(0,2*M_PI); // 0 to up, M_PI/2 move straigth M_PI downt
 
 
 
@@ -359,121 +374,121 @@ int  main(){
         * */
 
 
-//        /*
-//         * Piecewise constant // all linear, for presentation
-//         * */
-//
-//        Gamma(theta1-1) = (L_inf * exp(alpha * (24.0/72.0*t - t_s)) / (L_inf / L0 + exp(alpha * (24.0/72.0*t - t_s)) - 1)) +
-//                          k_0;
-//
-//        for (int i = 0; i < theta1-1; i++) {
-//            Gamma(i) =  double(i)/(theta1-1) * Gamma(theta1-1);
-//        }
-//
-//
-//
-//
-//
-//        /*
-//         * this time I will find Gamma_x from Gamma, before it was other way around, assume theta is the last one
-//         */
-//
-//
-//        for (int i = 0; i < theta1 - 1; i++) {
-////            Gamma(i) =
-////                    Gamma_initial * (double(i) / double(space_grid_controller)) * (Gamma_x(i)); // linearly increasing
-//            Gamma_x(i) = (Gamma(i + 1) - Gamma(i)) / dx; // linearly increasing
-//
-//        }
-//
-//        Gamma_x(theta1 - 1) = Gamma_x(theta1 - 2);
-//
-//
-//        for (int i = 0; i < theta1; i++) {
-////            Gamma(i) =
-////                    Gamma_initial * (double(i) / double(space_grid_controller)) * (Gamma_x(i)); // linearly increasing
-//            strain(i) = log(Gamma_x(i)) / t; // linearly increasing
-//
-//        }
+        /*
+         * Piecewise constant // all linear, for presentation
+         * */
 
+        Gamma(theta1-1) = (L_inf * exp(alpha * (24.0/72.0*t - t_s)) / (L_inf / L0 + exp(alpha * (24.0/72.0*t - t_s)) - 1)) +
+                          k_0;
 
-
-//        /*
-//         * Domain growth
-//         * */
-//
-//        Lt = thetasmall + thetasmall * exp(alpha * t);
-//        Lt = Gamma(length_x - 1);
-
-
-//        //   Ltdot = alpha * thetasmall * exp(alpha * t); // piecewise, exact
-//
-//        Ltdot = (Lt - Lt_old) / dt; //could be used for both, especially should be used if derivative is unknown
-//
-//        Lt_old = Lt;
-//
-//
-//        // I need Gamma_t for cos verification as well
-//
-//        for (int i = 0; i < length_x; ++i) {
-//
-//            Gamma_t(i) = (Gamma(i) - Gamma_old(i)) / dt;
-//
-//        }
-//
-//
-//
-//        /// update positions uniformly based on the domain growth
-//
-//        vdouble2 x; // use variable x for the position of cells
-//        int pos;
-//
-//        for (int i = 0; i < particles.size(); i++) {
-//
-//            x = get<position>(particles[i]);
-//            // since I do not know how to do it for general case, I will do it for my specific
-//
-//            if (x[0] > Gamma(theta1 - 1)) {
-//                get<position>(particles)[i] += vdouble2(Gamma(theta1 - 1) - Gamma_old(theta1 - 1), 0);
-//            } else {
-//                get<position>(particles)[i] *= vdouble2((Gamma(theta1 - 1)) / (Gamma_old(theta1 - 1)),
-//                                                        1); // update position based on changes in Gamma
-//            }
-//
-//        }
-//
-//
-//        Gamma_old = Gamma;
-//
+        for (int i = 0; i < theta1-1; i++) {
+            Gamma(i) =  double(i)/(theta1-1) * Gamma(theta1-1);
+        }
 
 
 
 
-//
-//
-//
-//
-//        // save the chemoattractant concentration with properly rescaled coordinates
-//
-//        int counting_first = 0;
-//        int counting_final = 0;
-//
-//        for (int a = 0; a < length_x; a++) {
-//            counting_first = length_y * a;
-//            counting_final = counting_first + length_y;
-//            for (int k = counting_first; k < counting_final; k++) {
-//                chemo_3col(k, 0) = Gamma(a);
-//            }
-//        }
-//
-//
-//
-//
-//
-//        // u column
-//        for (int i = 0; i < length_x * length_y; i++) {
-//            chemo_3col(i, 3) = chemo(chemo_3col_ind(i, 0), chemo_3col_ind(i, 1));
-//        }
+
+        /*
+         * this time I will find Gamma_x from Gamma, before it was other way around, assume theta is the last one
+         */
+
+
+        for (int i = 0; i < theta1 - 1; i++) {
+//            Gamma(i) =
+//                    Gamma_initial * (double(i) / double(space_grid_controller)) * (Gamma_x(i)); // linearly increasing
+            Gamma_x(i) = (Gamma(i + 1) - Gamma(i)) / dx; // linearly increasing
+
+        }
+
+        Gamma_x(theta1 - 1) = Gamma_x(theta1 - 2);
+
+
+        for (int i = 0; i < theta1; i++) {
+//            Gamma(i) =
+//                    Gamma_initial * (double(i) / double(space_grid_controller)) * (Gamma_x(i)); // linearly increasing
+            strain(i) = log(Gamma_x(i)) / t; // linearly increasing
+
+        }
+
+
+
+        /*
+         * Domain growth
+         * */
+
+        Lt = thetasmall + thetasmall * exp(alpha * t);
+        Lt = Gamma(length_x - 1);
+
+
+        //   Ltdot = alpha * thetasmall * exp(alpha * t); // piecewise, exact
+
+        Ltdot = (Lt - Lt_old) / dt; //could be used for both, especially should be used if derivative is unknown
+
+        Lt_old = Lt;
+
+
+        // I need Gamma_t for cos verification as well
+
+        for (int i = 0; i < length_x; ++i) {
+
+            Gamma_t(i) = (Gamma(i) - Gamma_old(i)) / dt;
+
+        }
+
+
+
+        /// update positions uniformly based on the domain growth
+
+        vdouble2 x; // use variable x for the position of cells
+        int pos;
+
+        for (int i = 0; i < particles.size(); i++) {
+
+            x = get<position>(particles[i]);
+            // since I do not know how to do it for general case, I will do it for my specific
+
+            if (x[0] > Gamma(theta1 - 1)) {
+                get<position>(particles)[i] += vdouble2(Gamma(theta1 - 1) - Gamma_old(theta1 - 1), 0);
+            } else {
+                get<position>(particles)[i] *= vdouble2((Gamma(theta1 - 1)) / (Gamma_old(theta1 - 1)),
+                                                        1); // update position based on changes in Gamma
+            }
+
+        }
+
+
+        Gamma_old = Gamma;
+
+
+
+
+
+
+
+
+
+        // save the chemoattractant concentration with properly rescaled coordinates
+
+        int counting_first = 0;
+        int counting_final = 0;
+
+        for (int a = 0; a < length_x; a++) {
+            counting_first = length_y * a;
+            counting_final = counting_first + length_y;
+            for (int k = counting_first; k < counting_final; k++) {
+                chemo_3col(k, 0) = Gamma(a);
+            }
+        }
+
+
+
+
+
+        // u column
+        for (int i = 0; i < length_x * length_y; i++) {
+            chemo_3col(i, 3) = chemo(chemo_3col_ind(i, 0), chemo_3col_ind(i, 1));
+        }
 
 
 
@@ -529,11 +544,12 @@ int  main(){
             for (int k = 0; k < filo_number + 1; k++) {
 
                 double random_angle_tem = uniformpi(gen1);
+                //cout << "random angle " << random_angle_tem << endl;
                 int sign_x_tem, sign_y_tem;
 
                 // either one can choose any angle, even though it would lead to a movement outside the domain
                 random_angle_tem = uniformpi(gen1);
-               random_angle[k] = random_angle_tem;// either one can choose any angle, even though it would lead to a movement outside the domain
+              random_angle[k] = random_angle_tem;// either one can choose any angle, even though it would lead to a movement outside the domain
 
 //                // or the filopodia can only be sent inside the domain
 
@@ -544,7 +560,7 @@ int  main(){
 //                    random_angle_tem = uniformpi(gen1);
 //                }
 //                random_angle[k] = random_angle_tem;
-
+//
 
             }
 
@@ -592,19 +608,19 @@ int  main(){
 
 
 
-        if (counter % 100 == 0) {
+        if (counter % 20 == 0) {
 
             // save at every time step
-    #ifdef HAVE_VTK
-                vtkWriteGrid("Fixedparticles_random120width", t, particles.get_grid(true));
-    #endif
+//    #ifdef HAVE_VTK
+//                vtkWriteGrid("trialParticles", t, particles.get_grid(true));
+//    #endif
 
 
 
 
-            //ofstream output("Fixedmatrix_random240widthINSIDE" + to_string(int(t)) + ".csv");
-
-
+//            ofstream output("trialm" + to_string(int(t)) + ".csv");
+//
+//
 //            output << "x, y, z, u" << "\n" << endl;
 //
 //
@@ -621,9 +637,104 @@ int  main(){
 
 
     }
+
+
+    //    /*
+// * return the density of cells in domain_partition parts of the domain
+// */
+    const int domain_partition = int(Gamma(length_x-1) / double(55));; // number of intervals of 50 \mu m
+
+
+    VectorXi proportions = VectorXi::Zero(domain_partition); // integer with number of cells in particular part
+
+    double one_part = Gamma(length_x-1) / double(domain_partition);
+
+
+    for (int i = 0; i < domain_partition; i++) {
+
+        for (int j = 0; j < particles.size(); j++) {
+            vdouble2 x = get<position>(particles[j]);
+            if (i * one_part < x[0] && x[0] < (i + 1) * one_part) {
+                proportions(i) += 1;
+            }
+        }
+
+    }
+
+    return proportions;
+
 }
 
 
+// parameter analysis
+int main() {
+
+    const int number_parameters = 1; // parameter range
+    const int sim_num = 20;
+
+    //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
+
+    //int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+    //cout << "length " << vector_check_length.size() << endl;
+    int num_parts = 19; // for 1800 timesteps
+    MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
+
+    // n would correspond to different seeds
+    // parallel programming
+#pragma omp parallel for
+    for (int n = 0; n < sim_num; n++) {
+
+
+        //initialise the matrix to store the values
+        MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
+
+        //#pragma omp parallel for
+        //        for (int i = 0; i < number_parameters; i++) {
+
+        //for (int j = 0; j < 1; j++) {
+
+        numbers.block(0, 0, num_parts, 1) = proportions( n);
+
+        //}
+        // }
+
+
+        // This is what I am using for MATLAB
+        ofstream output2("width180-uni" + to_string(n) + ".csv");
+
+        for (int i = 0; i < numbers.rows(); i++) {
+
+            for (int j = 0; j < numbers.cols(); j++) {
+
+                output2 << numbers(i, j) << ", ";
+
+                sum_of_all(i, j) += numbers(i, j);
+
+            }
+            output2 << "\n" << endl;
+        }
+
+    }
+    /*
+    * will store everything in one matrix, the entries will be summed over all simulations
+    */
+
+    //ofstream output3("FIRST075_twice_speed_later.csv");
+    ofstream output3("width180-uni.csv");
+
+
+    for (int i = 0; i < num_parts; i++) {
+
+        for (int j = 0; j < number_parameters; j++) {
+
+            output3 << sum_of_all(i, j) << ", ";
+
+        }
+        output3 << "\n" << endl;
+    }
+
+
+}
 
 
 
