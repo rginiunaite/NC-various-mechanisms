@@ -48,7 +48,7 @@ VectorXi proportions(int n_seed) {
             int(domain_length) * int(space_grid_controller); // length in x direction of the chemoattractant matrix
     double initial_domain_length = domain_length;
     int real_length_y = 120;
-    const int length_y = int(1.8 * space_grid_controller); // length in y direction of the chemoattractant matrix
+    const int length_y = int(1.2 * space_grid_controller); // length in y direction of the chemoattractant matrix
     const double final_time = 72; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
 
 // parameters for the dynamics of chemoattractant concentration
@@ -86,7 +86,7 @@ VectorXi proportions(int n_seed) {
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 3; // number of filopodia sent
+    const int filo_number = 1; // number of filopodia sent
     int same_dir = 0; // number of steps in the same direction +1, because if 0, then only one step in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
@@ -266,11 +266,12 @@ VectorXi proportions(int n_seed) {
 
     // initialise random number generator for particles entering the domain, appearing at the start in x and uniformly in y
     std::default_random_engine gen;
-   // std::uniform_real_distribution<double> uniform(cell_radius + , length_y - 1 - cell_radius);
+    std::uniform_real_distribution<double> uniform(cell_radius , length_y - 1 - cell_radius);// when length is 120
 
-    //for double length
-    std::uniform_real_distribution<double> uniform(cell_radius+ double(real_length_y)/2, length_y - double(real_length_y)/2 -1 - cell_radius);
-
+    //for double length (240)
+   //std::uniform_real_distribution<double> uniform(cell_radius+ double(real_length_y)/2, length_y - double(real_length_y)/2 -1 - cell_radius);
+    // for 180 length
+    //std::uniform_real_distribution<double> uniform(cell_radius+ double(real_length_y)/4, length_y - double(real_length_y)/4 -1 - cell_radius);
 
 
 
@@ -286,14 +287,21 @@ VectorXi proportions(int n_seed) {
 
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
 
-//        get<position>(particles[i]) = vdouble2(cell_radius, (i + 1) * double(length_y - 1) / double(N) -
-//                                                            0.5 * double(length_y - 1) /
-//                                                            double(N)); // x=2, uniformly in y
+        get<position>(particles[i]) = vdouble2(cell_radius, (i + 1) * double(length_y - 1) / double(N) -
+                                                            0.5 * double(length_y - 1) /
+                                                            double(N)); // x=radius, uniformly in y
 
-        // for double length
-        get<position>(particles[i]) = vdouble2(cell_radius, real_length_y/4 + (i + 1) * double(real_length_y - 1) / double(N) -
-                                                            0.5 * double(real_length_y - 1) /
-                                                            double(N)); // x=2, uniformly in y
+        // for double length (240)
+//        get<position>(particles[i]) = vdouble2(cell_radius, real_length_y/2 + (i + 1) * double(real_length_y - 1) / double(N) -
+//                                                            0.5 * double(real_length_y - 1) /
+//                                                            double(N)); // x=radius, uniformly in y
+
+        // for length 180
+//        get<position>(particles[i]) = vdouble2(cell_radius, real_length_y/4 + (i + 1) * double(real_length_y - 1) / double(N) -
+//                                                            0.25 * double(real_length_y - 1) /
+//                                                            double(N)); // x=radius, uniformly in y
+
+
         get<persistence_extent>(particles[i]) = 0;
         get<same_dir_step>(particles[i]) = 0;
 
@@ -311,9 +319,10 @@ VectorXi proportions(int n_seed) {
     gen1.seed(t * n_seed); // choose different seeds to obtain different random numbers
     //std::uniform_real_distribution<double> uniformpi(-M_PI/3.5,M_PI/3.5 +  M_PI); // 0 to up, M_PI/2 move straigth M_PI downt
 
-    //std::normal_distribution<double> uniformpi(M_PI/2,2); // mean 0 variance 1
+    std::normal_distribution<double> normal(M_PI/2,2); // mean 0 variance 1
 
-    std::uniform_real_distribution<double> uniformpi(0,2*M_PI); // 0 to up, M_PI/2 move straigth M_PI downt
+    // uniformly random
+    //std::uniform_real_distribution<double> uniformpi(0,2*M_PI); // 0 to up, M_PI/2 move straigth M_PI downt
 
 
 
@@ -325,7 +334,7 @@ VectorXi proportions(int n_seed) {
 
 
 
-//              insert new cells
+//      insert new cells
 
 
         bool free_position = false;
@@ -482,9 +491,6 @@ VectorXi proportions(int n_seed) {
         }
 
 
-
-
-
         // u column
         for (int i = 0; i < length_x * length_y; i++) {
             chemo_3col(i, 3) = chemo(chemo_3col_ind(i, 0), chemo_3col_ind(i, 1));
@@ -543,13 +549,41 @@ VectorXi proportions(int n_seed) {
             // choose the number of angles where the filopodia is sent
             for (int k = 0; k < filo_number + 1; k++) {
 
-                double random_angle_tem = uniformpi(gen1);
-                //cout << "random angle " << random_angle_tem << endl;
-                int sign_x_tem, sign_y_tem;
+                // uniform
+
+//                double random_angle_tem = uniformpi(gen1);
+//
+//                // either one can choose any angle, even though it would lead to a movement outside the domain
+//                random_angle_tem = uniformpi(gen1);
+//                random_angle[k] = random_angle_tem;// either one can choose any angle, even though it would lead to a movement outside the domain
+//
+////                // or the filopodia can only be sent inside the domain
+//
+////                while (((x[0] + sin(random_angle_tem) * l_filo_y) < cell_radius ||
+////                        ((x[0] + sin(random_angle_tem) * l_filo_y)) >
+////                                Gamma(length_x - 1) || (x[1] + cos(random_angle_tem) * l_filo_y) < cell_radius ||
+////                        (x[1] + cos(random_angle_tem) * l_filo_y) > length_y - cell_radius)) {
+////                    random_angle_tem = uniformpi(gen1);
+////                }
+////                random_angle[k] = random_angle_tem;
+//
+
+                // normal
+
+
+                double random_angle_tem = normal(gen1);
 
                 // either one can choose any angle, even though it would lead to a movement outside the domain
-                random_angle_tem = uniformpi(gen1);
-              random_angle[k] = random_angle_tem;// either one can choose any angle, even though it would lead to a movement outside the domain
+                //random_angle_tem = normal(gen1);
+
+                // this is for truncated normal distribution
+               do{
+                    random_angle_tem = normal(gen1);
+                }while( random_angle_tem< - M_PI/2.0 || random_angle_tem>(3.0*M_PI)/2.0);
+
+                random_angle[k] = random_angle_tem;// either one can choose any angle, even though it would lead to a movement outside the domain
+
+
 
 //                // or the filopodia can only be sent inside the domain
 
@@ -557,10 +591,17 @@ VectorXi proportions(int n_seed) {
 //                        ((x[0] + sin(random_angle_tem) * l_filo_y)) >
 //                                Gamma(length_x - 1) || (x[1] + cos(random_angle_tem) * l_filo_y) < cell_radius ||
 //                        (x[1] + cos(random_angle_tem) * l_filo_y) > length_y - cell_radius)) {
-//                    random_angle_tem = uniformpi(gen1);
+//                    do{
+//                        random_angle_tem = normal(gen1);
+//                    }while( random_angle_tem< - M_PI/2.0 || random_angle_tem>(3.0*M_PI)/2.0);
 //                }
 //                random_angle[k] = random_angle_tem;
-//
+
+
+
+
+
+
 
             }
 
@@ -611,14 +652,14 @@ VectorXi proportions(int n_seed) {
         if (counter % 20 == 0) {
 
             // save at every time step
-//    #ifdef HAVE_VTK
-//                vtkWriteGrid("trialParticles", t, particles.get_grid(true));
-//    #endif
+    #ifdef HAVE_VTK
+                vtkWriteGrid("fixedParticles", t, particles.get_grid(true));
+    #endif
 
 
 
-
-//            ofstream output("trialm" + to_string(int(t)) + ".csv");
+//
+//            ofstream output("fixedMatrix" + to_string(int(t)) + ".csv");
 //
 //
 //            output << "x, y, z, u" << "\n" << endl;
@@ -630,9 +671,9 @@ VectorXi proportions(int n_seed) {
 //                }
 //                output << "\n" << endl;
 //            }
+//
 
-
-        }
+       }
 
 
 
@@ -642,7 +683,8 @@ VectorXi proportions(int n_seed) {
     //    /*
 // * return the density of cells in domain_partition parts of the domain
 // */
-    const int domain_partition = int(Gamma(length_x-1) / double(55));; // number of intervals of 50 \mu m
+    const int domain_partition = round(Gamma(length_x-1) / double(55));; // number of intervals of 50 \mu m
+
 
 
     VectorXi proportions = VectorXi::Zero(domain_partition); // integer with number of cells in particular part
@@ -670,13 +712,13 @@ VectorXi proportions(int n_seed) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 20;
+    const int sim_num = 1;
 
-    //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
-
-    //int num_parts = vector_check_length.size(); // number of parts that I partition my domain
-    //cout << "length " << vector_check_length.size() << endl;
-    int num_parts = 19; // for 1800 timesteps
+//    VectorXi vector_check_length = proportions(2); //just to know what the length is
+//
+//    int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+//    cout << "length " << vector_check_length.size() << endl;
+    int num_parts = 20; // for 1800 timesteps
     MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
 
     // n would correspond to different seeds
@@ -699,39 +741,39 @@ int main() {
         // }
 
 
-        // This is what I am using for MATLAB
-        ofstream output2("width180-uni" + to_string(n) + ".csv");
-
-        for (int i = 0; i < numbers.rows(); i++) {
-
-            for (int j = 0; j < numbers.cols(); j++) {
-
-                output2 << numbers(i, j) << ", ";
-
-                sum_of_all(i, j) += numbers(i, j);
-
-            }
-            output2 << "\n" << endl;
-        }
+//        // This is what I am using for MATLAB
+//        ofstream output2("growing-width180-normal2var" + to_string(n) + ".csv");
+//
+//        for (int i = 0; i < numbers.rows(); i++) {
+//
+//            for (int j = 0; j < numbers.cols(); j++) {
+//
+//                output2 << numbers(i, j) << ", ";
+//
+//              //  sum_of_all(i, j) += numbers(i, j);
+//
+//            }
+//            output2 << "\n" << endl;
+//        }
 
     }
     /*
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    //ofstream output3("FIRST075_twice_speed_later.csv");
-    ofstream output3("width180-uni.csv");
-
-
-    for (int i = 0; i < num_parts; i++) {
-
-        for (int j = 0; j < number_parameters; j++) {
-
-            output3 << sum_of_all(i, j) << ", ";
-
-        }
-        output3 << "\n" << endl;
-    }
+//    //ofstream output3("FIRST075_twice_speed_later.csv");
+//    ofstream output3("width180-uni.csv");
+//
+//
+//    for (int i = 0; i < num_parts; i++) {
+//
+//        for (int j = 0; j < number_parameters; j++) {
+//
+//            output3 << sum_of_all(i, j) << ", ";
+//
+//        }
+//        output3 << "\n" << endl;
+//    }
 
 
 }
