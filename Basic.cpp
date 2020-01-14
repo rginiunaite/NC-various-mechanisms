@@ -311,7 +311,7 @@ VectorXi proportions(int n_seed) {
                 random_angle_tem = normal(gen1);
                 x_temp = x + speed_l * vdouble2(sin(random_angle_tem), cos(random_angle_tem));
 
-            }while( random_angle_tem< - M_PI/2.0 || random_angle_tem>(3.0*M_PI)/2.0) || x_temp[0] < cell_radius || x_temp[0] > Gamma(length_x - 1)-cell_radius || (x_temp[1]) < cell_radius ||
+            }while( random_angle_tem< - M_PI/2.0 || random_angle_tem>(3.0*M_PI)/2.0 || x_temp[0] < cell_radius || x_temp[0] > Gamma(length_x - 1)-cell_radius || (x_temp[1]) < cell_radius ||
                                                                                        (x_temp[1]) > length_y - 1 - cell_radius); // SAMPLE INSIDE, for REJECT I commented the second part
             random_angle = random_angle_tem;// either one can choose any angle, even though it would lead to a movement outside the domain
 
