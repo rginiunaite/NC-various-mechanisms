@@ -30,7 +30,7 @@ VectorXi proportions(int n_seed) {
     else{
         length_x = 300;// length in x direction of the chemoattractant matrix, starts from 300
     }
-    cout << length_x << endl;
+
     int length_y = 120;
     double Lt_old = length_x;
     int real_length_y = 120;
@@ -42,6 +42,9 @@ VectorXi proportions(int n_seed) {
     double speed_l = 0.8;//10 * 0.05;// 0.05;//1;//0.05; // speed of a leader cell
     const size_t N = 5; // initial number of cells
     double sigma = 2.0;
+    double mean =0.0;
+
+    vdouble2 random_vector; // for cell position updates
 
     // cell paramters
     double cell_radius = 7.5;//0.5; // radius of a cell
@@ -66,16 +69,7 @@ VectorXi proportions(int n_seed) {
     double t_s = 12.77;
     double alpha = 0.288;
     double k_0 = 291.2;
-
-    /*
-    * strain rate
-    * */
-
-    //piecewise constant, two parts
-    double thetasmall = 1.00; // first thetasmall is growing
-    int theta1 = int(thetasmall * length_x);
-
-    VectorXd strain = VectorXd::Zero(length_x);
+    
 
     // growth function
 
@@ -87,7 +81,6 @@ VectorXi proportions(int n_seed) {
     VectorXd Gamma_old = VectorXd::Zero(length_x);
 
     for (int i = 0; i < length_x; i++) {
-        Gamma_x(i) = exp(0 * strain(i));
         Gamma(i) = i;
         Gamma_old(i) = Gamma(i);
     }
@@ -156,6 +149,11 @@ VectorXi proportions(int n_seed) {
 
     std::normal_distribution<double> normal(M_PI/2,sigma); // normal distribution for filopodia
 
+    // to have the same as Lennard-Jones
+//    std::normal_distribution<double> normalX(mean,1.0); // mean 1 variance 1
+//    std::normal_distribution<double> normalY(0.0,1.0); // mean 0 variance 1
+
+
     //for each timestep
     while (t < final_time) {
 
@@ -210,12 +208,12 @@ VectorXi proportions(int n_seed) {
          * Piecewise constant // all linear, for presentation
          * */
 
-        Gamma(theta1 - 1) = (L_inf * exp(alpha * (24.0 / final_time * t - t_s)) /
+        Gamma(length_x - 1) = (L_inf * exp(alpha * (24.0 / final_time * t - t_s)) /
                              (L_inf / L0 + exp(alpha * (24.0 / final_time * t - t_s)) - 1)) +
                             k_0;
 
-        for (int i = 0; i < theta1 - 1; i++) {
-            Gamma(i) = (double(i) / (theta1 - 1)) * Gamma(theta1 - 1);
+        for (int i = 0; i < length_x - 1; i++) {
+            Gamma(i) = (double(i) / (length_x - 1)) * Gamma(length_x - 1);
         }
 
 
@@ -237,10 +235,10 @@ VectorXi proportions(int n_seed) {
             x = get<position>(particles[i]);
             // since I do not know how to do it for general case, I will do it for my specific
 
-//            if (x[0] > Gamma(theta1 - 1)) { // these are very extreme cases
-//                get<position>(particles)[i] += vdouble2(Gamma(theta1 - 1) - Gamma_old(theta1 - 1), 0);
+//            if (x[0] > Gamma(length_x - 1)) { // these are very extreme cases
+//                get<position>(particles)[i] += vdouble2(Gamma(length_x - 1) - Gamma_old(length_x - 1), 0);
 //            } else {
-            get<position>(particles)[i] *= vdouble2((Gamma(theta1 - 1)) / (Gamma_old(theta1 - 1)),
+            get<position>(particles)[i] *= vdouble2((Gamma(length_x - 1)) / (Gamma_old(length_x - 1)),
                                                     1); // update position based on changes in Gamma
             //}
 
@@ -293,6 +291,7 @@ VectorXi proportions(int n_seed) {
 
         double x_in;
 
+  //       this is what I had with an angle
         // create an array to store random directions
         double random_angle;
 
@@ -316,11 +315,31 @@ VectorXi proportions(int n_seed) {
             random_angle = random_angle_tem;// either one can choose any angle, even though it would lead to a movement outside the domain
 
 
-
-
-
         x += speed_l * vdouble2(sin(random_angle), cos(random_angle));
 
+// to make consistent with Lennard-Jones
+
+////        random_vector[0] = normalX(gen1);
+////        random_vector[1] = normalY(gen1);
+////
+////        random_vector = random_vector/random_vector.norm();
+//        // this is for truncated normal distribution, assume that it has to be inside the domain, sample inside the domain
+//            int i = 0;
+//            do{
+//                i = i+1;
+//                random_vector[0] = normalX(gen1);
+//                random_vector[1] = normalY(gen1);
+//
+//                random_vector = random_vector/random_vector.norm();
+//                x_temp = x + speed_l * random_vector;
+//
+//            }while( x_temp[0] < cell_radius || x_temp[0] > Gamma(length_x - 1)-cell_radius || (x_temp[1]) < cell_radius ||
+//                                                                                       (x_temp[1]) > length_y - 1 - cell_radius); // SAMPLE INSIDE, for REJECT I commented the second part
+//
+//
+//        x += speed_l * random_vector;
+
+        //end of the same as Lennard Jones
 
 
         bool free_position = true; // check if the neighbouring position is free
@@ -339,10 +358,12 @@ VectorXi proportions(int n_seed) {
         if (free_position && x[0] > cell_radius && x[0] < Gamma(length_x - 1) -cell_radius && (x[1]) > cell_radius &&
             (x[1]) < length_y - 1 - cell_radius) {
 
-
+// when I look at the angle
             get<position>(particles)[particle_id(j)] +=
                     speed_l * vdouble2(sin(random_angle),
                                        cos(random_angle)); // update if nothing is in the next position
+//           get<position>(particles)[particle_id(j)] += speed_l * random_vector; // update if nothing is in the next position, same as Lennard Jones
+
 
         }
     }
@@ -384,10 +405,15 @@ VectorXi proportions(int n_seed) {
         }
 
     }
+
     //position of leaders
     for (int i = 0; i<N; i++){
-        cout << "position leaders " << get<position>(particles[i]) << endl;
+        vdouble2 xposi = get<position>(particles[i]);
+        //cout << "position leaders " << get<position>(particles[i]) << endl;
+        cout << xposi[0] << endl;
     }
+
+
 
     return proportions;
 
@@ -404,7 +430,7 @@ VectorXi proportions(int n_seed) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 20;
+    const int sim_num = 1;
 
     VectorXi vector_check_length = proportions(2); //just to know what the length is
 //
