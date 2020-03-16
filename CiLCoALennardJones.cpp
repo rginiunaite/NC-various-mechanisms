@@ -13,6 +13,7 @@
 #include <math.h>
 #include <assert.h>
 
+
 using namespace std;
 using namespace Aboria;
 using namespace Eigen; // objects VectorXd, MatrixXd
@@ -20,35 +21,35 @@ using namespace Eigen; // objects VectorXd, MatrixXd
 
 VectorXi proportions(int n_seed) {
 
-    bool domain_growth = true; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = true;
+    bool domain_growth = false; // if false change length_x to 1100, true 300, Mayor false
+    bool CiLonly = false;
 
     int length_x;
     if (domain_growth == false) {
-        length_x = 1100;//1500; // normally 1100, Mayor, with arches 1500
+        length_x = 1500;//1500; // normally 1100, Mayor, with arches 1500
 
     } else {
-        length_x = 300;// length in x direction of the chemoattractant matrix
+        length_x = 300;// length in x velocity of the chemoattractant matrix
     }
 
-    int length_y = 120; // Mayor, ours 120;// from 218 to 130 reduction NarrowDomain 130
+    int length_y = 218; // Mayor 218, ours 120;// from 218 to 130 reduction NarrowDomain 130
     double Lt_old = length_x;
     int real_length_y = 120;
-    const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs
+    const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
     double dt = 0.01; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
-    const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
+    const size_t N = 3; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = 0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x direction
-    double mean = 0.001;//1;//
-    double cell_radius = 7.5;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
+    double meanL = 0.0;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
+    double mean = 0.0;//0.001;//1;//
+    double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
 
-    double D = 5.0; // diffusion coefficient for Brownian motion
+    double D = 0.01;//0.001; // diffusion coefficient for Brownian motion
 
     // CiL and CoA paramters, Lennard Jones
     vdouble2 sum_forces; // some of all the forces exerted on one cell, always set to zero for a new cell
@@ -58,9 +59,11 @@ VectorXi proportions(int n_seed) {
 
     //parameters for Lennard-Jones model
     double sigma_max = diameter;//15.0; // cell diamter ( don't know why I wrote this before: maximum distance at which the cells can have an effect on each other)
-    double search_param = 50.0;//100.0;//Mayor , ours 50.0 //radius to search for cell-cell interactions
+    double search_param = 100.0;//100.0;//Mayor , ours 50.0 //radius to search for cell-cell interactions
     double f0 = 1.0;//1 before strength of the force
-    double eps_ij = 50.0; // depth of potential well
+    double eps_ij = 200.0; // depth of potential well, Lennard-Jones
+
+    double a = 0.5; // Morse parameter
     vdouble2 force_ij; // store the value of force
     double dzdr = 0.0; // Lennard-Jones potential initialise
     vdouble2 change; // difference between the positions of two cells
@@ -81,10 +84,10 @@ VectorXi proportions(int n_seed) {
     int numberofcellsOld = N;
 // cell variable
     ABORIA_VARIABLE(radius, double, "radius");
-    ABORIA_VARIABLE(direction, vdouble2, "direction");// stores the direction a particle moved
+    ABORIA_VARIABLE(velocity, vdouble2, "velocity");// stores the velocity a particle moved
     ABORIA_VARIABLE(type, int, "type");// 0 if a cell is a leader, 1 if follower
     ABORIA_VARIABLE(arches, int, "arches");// 0 if has not reached arches yet, 1 if it has reached the branches
-    typedef Particles<std::tuple<radius,type,arches, direction>, 2> particle_type; // 2 stands for dimension
+    typedef Particles<std::tuple<radius,type,arches, velocity>, 2> particle_type; // 2 stands for dimension
 
 // will use stored value of the position of a particle
     typedef particle_type::position position;
@@ -173,7 +176,7 @@ VectorXi proportions(int n_seed) {
 
 
     // initialise the number of particles
-    particle_type particles(N); // Mayor 10*N, ours N
+    particle_type particles(10*N); // Mayor 10*N, ours N
 
     // initialise random number generator for particles entering the domain, appearing at the start in x and uniformly in y
     std::default_random_engine gen;
@@ -201,9 +204,9 @@ VectorXi proportions(int n_seed) {
                                                                 0.5 * double(length_y - 1) /
                                                                 double(N)); // x=radius, uniformly in
 
-            get<type>(particles[i]) = 0; // leaders, Mayor, comment
+            //get<type>(particles[i]) = 0; // leaders, Mayor, comment
 
-////// Mayor below this
+//////// Mayor below this
 //            get<position>(particles[i+5]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
 //                                                                0.5 * double(length_y - 1) /
 //                                                                double(N)); // x=radius, uniformly in y
@@ -323,17 +326,17 @@ VectorXi proportions(int n_seed) {
 
 //    // Mayor leaders and followers
 //
-//    for (int i = 0; i < particles.size();i++ ){
-//        get<arches>(particles[i]) = 0;
-//        if (i >44){
-//            get<type>(particles[i]) = 0;
-//
-//        }
-//
-//        else{
-//            get<type>(particles[i]) = 1;
-//        }
-//    }
+    for (int i = 0; i < particles.size();i++ ){
+        get<arches>(particles[i]) = 0;
+        if (i >44){
+            get<type>(particles[i]) = 0;
+
+        }
+
+        else{
+            get<type>(particles[i]) = 1;
+        }
+    }
 
 
 
@@ -341,7 +344,7 @@ VectorXi proportions(int n_seed) {
     particles.update_positions();
 
 
-    // initialise neighbourhood search, note that the domain will grow in x direction, so I initialise larger domain
+    // initialise neighbourhood search, note that the domain will grow in x velocity, so I initialise larger domain
     particles.init_neighbour_search(vdouble2(-20, -20), 5 * vdouble2(length_x, length_y), vbool2(false, false));
 
 
@@ -370,39 +373,39 @@ VectorXi proportions(int n_seed) {
 //     while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
 //       while (particles.size() > 10){
         // Mayor comment this
-        //      insert new cells
-        //if (particles.size()<25) {
-        //if (counter % 100 == 0){
-        bool free_position = true;
-        particle_type::value_type f;
-
-        get<position>(f) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
-
-        /*
-         * loop over all neighbouring leaders within "dem_diameter" distance
-         */
-        for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), diameter); tpl != false; ++tpl) {
-
-            vdouble2 diffx = tpl.dx();
-
-            if (diffx.norm() < diameter) {
-                free_position = false;
-                break;
-            }
-        }
-
-        // all the cells are of the same type
-        get<type>(f) = 1; // leaders, Mayor, comment
-
-        if (free_position) {
-
-            particles.push_back(f);
-        }
-
-
-        particles.update_positions();
-        //}
-        // end of insert new cells
+//        //      insert new cells
+//        //if (particles.size()<25) {
+//        //if (counter % 100 == 0){
+//        bool free_position = true;
+//        particle_type::value_type f;
+//
+//        get<position>(f) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
+//
+//        /*
+//         * loop over all neighbouring leaders within "dem_diameter" distance
+//         */
+//        for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), diameter); tpl != false; ++tpl) {
+//
+//            vdouble2 diffx = tpl.dx();
+//
+//            if (diffx.norm() < diameter) {
+//                free_position = false;
+//                break;
+//            }
+//        }
+//
+//        // all the cells are of the same type
+//        get<type>(f) = 1; // leaders, Mayor, comment
+//
+//        if (free_position) {
+//
+//            particles.push_back(f);
+//        }
+//
+//
+//        particles.update_positions();
+//        //}
+//        // end of insert new cells
         t = t + dt;
 
         counter = counter + 1;
@@ -547,7 +550,18 @@ VectorXi proportions(int n_seed) {
                     if (CiLonly == true) {
                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow)/pow(distance,mpow+1));
                     } else {
-                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow)/pow(distance,mpow+1) - pow(sigma_max,npow) / pow(distance,npow+1));
+                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow)/pow(distance,mpow+1) - pow(sigma_max,npow) / pow(distance,npow+1)); //Lennard-Jones
+                        //Morse potential
+//                        if (distance < 2*diameter){
+//                            dzdr = 20* (exp(-2*a*(distance-diameter)) - exp(-a*(distance-diameter)));
+//                        }
+//                        if (distance >= 2*diameter && distance < 3*diameter){
+//                            dzdr = 20* (exp(-2*a*(distance-diameter)) - exp(-a*(distance-diameter))) * 0.5 * (1-sin((2*distance - diameter)/(2*diameter)));
+//                        }
+//                        if (distance > 3*diameter){
+//                            dzdr = 0;
+//                        }
+
                     }
 
 
@@ -640,8 +654,11 @@ VectorXi proportions(int n_seed) {
 //            }
 
 
-            vdouble2 direction;
-            direction = (sum_forces + random_vector);
+
+
+
+
+            //get<velocity>(particles[j]) = (sum_forces + random_vector);
 
 
             positions(j, 0) = x[0];
@@ -650,7 +667,7 @@ VectorXi proportions(int n_seed) {
 
             //if (free_position){
             //get<position>(particles[j]) = x;
-            //cout << direction.norm() << endl; // this is how much a cell moved
+            //cout << velocity.norm() << endl; // this is how much a cell moved
 
             //}
 
@@ -668,14 +685,14 @@ VectorXi proportions(int n_seed) {
 
         // for Mayor's, delete particles greater than 850
 //        countcellsinarches = 0;
-//        for (auto p : particles) {
-//            if (get<position>(p)[0] > 850.0) {
-//                countcellsinarches = countcellsinarches + 1;
-//                get<arches>(p) = 1;
-//                // get<alive>(p) = false;
-//            }
-//        }
-//
+        for (auto p : particles) {
+            if (get<position>(p)[0] > 850.0) {
+                countcellsinarches = countcellsinarches + 1;
+                get<arches>(p) = 1;
+                // get<alive>(p) = false;
+            }
+        }
+
 //        if (countcellsinarches > 0){
 //            cout << countcellsinarches << endl;
 //        }
@@ -683,9 +700,9 @@ VectorXi proportions(int n_seed) {
 
         particles.update_positions(); // not sure if needed here
 
-        // calculate pairwise distances
-//
-//        if (counter % 6000 == 0) {
+//        // calculate pairwise distances
+////
+//        if (counter % int(60.0/dt ) == 0) {
 //            std::default_random_engine gen2;
 //            gen2.seed(t * n_seed); // different seeds
 //            std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
@@ -707,7 +724,7 @@ VectorXi proportions(int n_seed) {
 //                }
 //            }
 //
-//
+////
 //            double pairdistance, pairdistance_old, shortestPairDistance;
 //            vdouble2 dist_vector;
 //
@@ -740,8 +757,8 @@ VectorXi proportions(int n_seed) {
 //            }
 //
 //        }
-
-        //end of pairwise distances
+//
+//        //end of pairwise distances
 
 
 
@@ -789,21 +806,21 @@ VectorXi proportions(int n_seed) {
 
 
 
-        if (counter % 6000 == 0) {
+        if (counter % int(60.0/dt ) == 0) { //  60/dt
 
         
         //    if (t <1078){
             //if (furthestCell > 980) { // for the one to see how long it takes till they reach the end
 
-//
-           //      save at every time step
-            #ifdef HAVE_VTK
-                vtkWriteGrid("ChickRepOnly50epsbias0p001FORALL", t, particles.get_grid(true));
-            #endif
-//
-
-           // }
 ////
+//           //      save at every time step
+//            #ifdef HAVE_VTK
+//                vtkWriteGrid("Cellseps200D0p0dt0p01distances", t, particles.get_grid(true));
+//            #endif
+//
+//
+////           // }
+//////
 
             // for the one to see how long it takes till they reach the end
 //        // postion of five cells at the front
@@ -840,7 +857,57 @@ VectorXi proportions(int n_seed) {
         //cout << "Final t " << t << endl;
     }
 
-    cout << t << endl;
+ //   cout << t << endl;
+
+    // calculate pairwise distances at the end of simulations
+//
+
+        std::default_random_engine gen2;
+        gen2.seed(t * n_seed); // different seeds
+        std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
+
+        VectorXi particle_id = VectorXi::Zero(particles.size());
+
+//
+        double pairdistance, pairdistance_old, shortestPairDistance;
+        vdouble2 dist_vector;
+
+
+        for (int j = 0; j < particles.size(); j++) {
+            vdouble2 x; // use variable x for the position of cells
+            //cout << "cell j " << j << endl;
+            // old version from here
+            x = get<position>(particles[j]);
+            shortestPairDistance = search_param;
+            for (auto k = euclidean_search(particles.get_query(), x, search_param); k != false; ++k) {
+
+                // make sure it is not the same cell
+                if (get<id>(*k) != get<id>(particles[j])) {
+                    distchange = get<position>(particles[j]) - get<position>(*k);
+                    pairdistance = distchange.norm();
+                    if (pairdistance < shortestPairDistance) {
+                        shortestPairDistance = pairdistance;
+                    }
+                    //cout << "pair dist " << pairdistance << endl;
+                    pairdistance_old = pairdistance;
+                }
+
+
+            }
+
+
+            cout << shortestPairDistance << endl;
+
+        }
+
+
+    //end of pairwise distances
+
+
+
+
+
+
 
 //    /*
 // * return the density of cells in domain_partition parts of the domain
@@ -929,7 +996,7 @@ VectorXi proportions(int n_seed) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
+    const int sim_num = 20;
 
     VectorXi vector_check_length = proportions(0); //just to know what the length is
 //
@@ -952,7 +1019,7 @@ int main() {
 
 //        // This is what I am using for MATLAB
 //        ofstream output2("sepdataChickD10eps10CoACiLGROWINGDOMAIN" + to_string(n) + ".csv");
-//
+////
 //        for (int i = 0; i < numbers.rows(); i++) {
 //
 //            for (int j = 0; j < numbers.cols(); j++) {
