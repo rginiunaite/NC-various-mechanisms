@@ -19,10 +19,10 @@ using namespace Aboria;
 using namespace Eigen; // objects VectorXd, MatrixXd
 
 
-VectorXi proportions(int n_seed) {
+VectorXi proportions(int n_seed, double D) {
 
     bool domain_growth = false; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = false;
+    bool CiLonly = true;
 
     int length_x;
     if (domain_growth == false) {
@@ -40,16 +40,16 @@ VectorXi proportions(int n_seed) {
     double dt = 0.01; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
-    const size_t N = 3; // initial number of cells Mayor narrow domain, NarrowDomain 3
+    const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = 0.0;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
-    double mean = 0.0;//0.001;//1;//
+    double meanL = 0.02;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
+    double mean = 0.02;//0.001;//1;//
     double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
 
-    double D = 0.01;//0.001; // diffusion coefficient for Brownian motion
+    //double D =1.0;//0.001; // diffusion coefficient for Brownian motion
 
     // CiL and CoA paramters, Lennard Jones
     vdouble2 sum_forces; // some of all the forces exerted on one cell, always set to zero for a new cell
@@ -207,38 +207,38 @@ VectorXi proportions(int n_seed) {
             //get<type>(particles[i]) = 0; // leaders, Mayor, comment
 
 //////// Mayor below this
-//            get<position>(particles[i+5]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                0.5 * double(length_y - 1) /
-//                                                                double(N)); // x=radius, uniformly in y
-//
-//
-//            get<position>(particles[i+10]) = vdouble2(5*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                0.5 * double(length_y - 1) /
-//                                                                double(N)); // x=radius, uniformly in y
-//
-//
-//            get<position>(particles[i+15]) = vdouble2(7*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                            0.5 * double(length_y - 1) /
-//                                                            double(N)); // x=radius, uniformly in y
-//
-//            get<position>(particles[i+20]) = vdouble2(9*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                 0.5 * double(length_y - 1) /
-//                                                                 double(N)); // x=radius, uniformly in y
-//        get<position>(particles[i+25]) = vdouble2(11*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                 0.5 * double(length_y - 1) /
-//                                                                 double(N)); // x=radius, uniformly in y
-//        get<position>(particles[i+30]) = vdouble2(13*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                 0.5 * double(length_y - 1) /
-//                                                                 double(N)); // x=radius, uniformly in y
-//        get<position>(particles[i+35]) = vdouble2(15*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                 0.5 * double(length_y - 1) /
-//                                                                 double(N)); // x=radius, uniformly in y
-//        get<position>(particles[i+40]) = vdouble2(17*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                 0.5 * double(length_y - 1) /
-//                                                                 double(N)); // x=radius, uniformly in y
-//        get<position>(particles[i+45]) = vdouble2(19*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                 0.5 * double(length_y - 1) /
-//                                                                 double(N)); // x=radius, uniformly in y
+            get<position>(particles[i+5]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                0.5 * double(length_y - 1) /
+                                                                double(N)); // x=radius, uniformly in y
+
+
+            get<position>(particles[i+10]) = vdouble2(5*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                0.5 * double(length_y - 1) /
+                                                                double(N)); // x=radius, uniformly in y
+
+
+            get<position>(particles[i+15]) = vdouble2(7*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                            0.5 * double(length_y - 1) /
+                                                            double(N)); // x=radius, uniformly in y
+
+            get<position>(particles[i+20]) = vdouble2(9*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                 0.5 * double(length_y - 1) /
+                                                                 double(N)); // x=radius, uniformly in y
+        get<position>(particles[i+25]) = vdouble2(11*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                 0.5 * double(length_y - 1) /
+                                                                 double(N)); // x=radius, uniformly in y
+        get<position>(particles[i+30]) = vdouble2(13*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                 0.5 * double(length_y - 1) /
+                                                                 double(N)); // x=radius, uniformly in y
+        get<position>(particles[i+35]) = vdouble2(15*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                 0.5 * double(length_y - 1) /
+                                                                 double(N)); // x=radius, uniformly in y
+        get<position>(particles[i+40]) = vdouble2(17*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                 0.5 * double(length_y - 1) /
+                                                                 double(N)); // x=radius, uniformly in y
+        get<position>(particles[i+45]) = vdouble2(19*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                 0.5 * double(length_y - 1) /
+                                                                 double(N)); // x=radius, uniformly in y
 
 //         narrow domain, NarrowDomain uncomment below
 //
@@ -353,6 +353,7 @@ VectorXi proportions(int n_seed) {
     // initialise random number generator to obtain random number between 0 and 2*pi
     std::default_random_engine gen1;
     gen1.seed( n_seed); // choose different seeds to obtain different random numbers
+
     //std::uniform_real_distribution<double> uniformpi(-M_PI/3.5,M_PI/3.5 +  M_PI); // 0 to up, M_PI/2 move straigth M_PI downt
 
     //std::normal_distribution<double> normal(M_PI/2,sigma); // normal distribution for filopodia
@@ -368,9 +369,9 @@ VectorXi proportions(int n_seed) {
     int countcellsinarches = 0;
 
     //for each timestep
-    while (t < final_time) {
+//    while (t < final_time) {
     //while (furthestCell < 1000.0) {
-//     while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+     while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
 //       while (particles.size() > 10){
         // Mayor comment this
 //        //      insert new cells
@@ -684,7 +685,7 @@ VectorXi proportions(int n_seed) {
         }
 
         // for Mayor's, delete particles greater than 850
-//        countcellsinarches = 0;
+        countcellsinarches = 0; // this has to be uncommented!!!
         for (auto p : particles) {
             if (get<position>(p)[0] > 850.0) {
                 countcellsinarches = countcellsinarches + 1;
@@ -813,13 +814,13 @@ VectorXi proportions(int n_seed) {
             //if (furthestCell > 980) { // for the one to see how long it takes till they reach the end
 
 ////
-//           //      save at every time step
-//            #ifdef HAVE_VTK
-//                vtkWriteGrid("Cellseps200D0p0dt0p01distances", t, particles.get_grid(true));
-//            #endif
-//
-//
-////           // }
+           //      save at every time step
+            #ifdef HAVE_VTK
+                vtkWriteGrid("CellsCHECK", t, particles.get_grid(true));
+            #endif
+
+
+//           // }
 //////
 
             // for the one to see how long it takes till they reach the end
@@ -857,51 +858,51 @@ VectorXi proportions(int n_seed) {
         //cout << "Final t " << t << endl;
     }
 
- //   cout << t << endl;
+   cout << t << endl;
 
-    // calculate pairwise distances at the end of simulations
+//    // calculate pairwise distances at the end of simulations
+////
 //
-
-        std::default_random_engine gen2;
-        gen2.seed(t * n_seed); // different seeds
-        std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
-
-        VectorXi particle_id = VectorXi::Zero(particles.size());
-
+//        std::default_random_engine gen2;
+//        gen2.seed(t * n_seed); // different seeds
+//        std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
 //
-        double pairdistance, pairdistance_old, shortestPairDistance;
-        vdouble2 dist_vector;
-
-
-        for (int j = 0; j < particles.size(); j++) {
-            vdouble2 x; // use variable x for the position of cells
-            //cout << "cell j " << j << endl;
-            // old version from here
-            x = get<position>(particles[j]);
-            shortestPairDistance = search_param;
-            for (auto k = euclidean_search(particles.get_query(), x, search_param); k != false; ++k) {
-
-                // make sure it is not the same cell
-                if (get<id>(*k) != get<id>(particles[j])) {
-                    distchange = get<position>(particles[j]) - get<position>(*k);
-                    pairdistance = distchange.norm();
-                    if (pairdistance < shortestPairDistance) {
-                        shortestPairDistance = pairdistance;
-                    }
-                    //cout << "pair dist " << pairdistance << endl;
-                    pairdistance_old = pairdistance;
-                }
-
-
-            }
-
-
-            cout << shortestPairDistance << endl;
-
-        }
-
-
-    //end of pairwise distances
+//        VectorXi particle_id = VectorXi::Zero(particles.size());
+//
+////
+//        double pairdistance, pairdistance_old, shortestPairDistance;
+//        vdouble2 dist_vector;
+//
+//
+//        for (int j = 0; j < particles.size(); j++) {
+//            vdouble2 x; // use variable x for the position of cells
+//            //cout << "cell j " << j << endl;
+//            // old version from here
+//            x = get<position>(particles[j]);
+//            shortestPairDistance = search_param;
+//            for (auto k = euclidean_search(particles.get_query(), x, search_param); k != false; ++k) {
+//
+//                // make sure it is not the same cell
+//                if (get<id>(*k) != get<id>(particles[j])) {
+//                    distchange = get<position>(particles[j]) - get<position>(*k);
+//                    pairdistance = distchange.norm();
+//                    if (pairdistance < shortestPairDistance) {
+//                        shortestPairDistance = pairdistance;
+//                    }
+//                    //cout << "pair dist " << pairdistance << endl;
+//                    pairdistance_old = pairdistance;
+//                }
+//
+//
+//            }
+//
+//
+//            cout << shortestPairDistance << endl;
+//
+//        }
+//
+//
+//    //end of pairwise distances
 
 
 
@@ -998,7 +999,8 @@ int main() {
     const int number_parameters = 1; // parameter range
     const int sim_num = 20;
 
-    VectorXi vector_check_length = proportions(0); //just to know what the length is
+    VectorXi vector_check_length = proportions(0,15.0); //just to know what the length is
+    cout << "ignore above" << endl;
 //
     int num_parts = vector_check_length.size(); // number of parts that I partition my domain
 //    cout << "length " << vector_check_length.size() << endl;
@@ -1006,16 +1008,26 @@ int main() {
     MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
 
  //    n would correspond to different seeds
-////     parallel programming
+    double D;
+    for (int i=1; i < 6; i++){
+        if (i==1){
+            D=1.0;
+        }else{
+            D=double((i-1)*3);
+        }
+        cout << "D = " << D << endl;
+
+
+        ////     parallel programming
 #pragma omp parallel for
-    for (int n = 1; n < sim_num; n++) {
+        for (int n = 1; n < sim_num; n++) {
 
 
-        //initialise the matrix to store the values
-        MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
+            //initialise the matrix to store the values
+            MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
 
 
-        numbers.block(0, 0, num_parts, 1) = proportions( n);
+            numbers.block(0, 0, num_parts, 1) = proportions( n,D);
 
 //        // This is what I am using for MATLAB
 //        ofstream output2("sepdataChickD10eps10CoACiLGROWINGDOMAIN" + to_string(n) + ".csv");
@@ -1032,7 +1044,15 @@ int main() {
 //            output2 << "\n" << endl;
 //        }
 
+        }
+
+
     }
+
+
+
+
+
     /*
 //    * will store everything in one matrix, the entries will be summed over all simulations
 //    */
