@@ -19,10 +19,11 @@ using namespace Aboria;
 using namespace Eigen; // objects VectorXd, MatrixXd
 
 
-VectorXi proportions(int n_seed, double D) {
+//VectorXi proportions(int n_seed, double D) {
+VectorXi proportions(int n_seed) {
 
     bool domain_growth = false; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = true;
+    bool CiLonly = false;
 
     int length_x;
     if (domain_growth == false) {
@@ -37,7 +38,7 @@ VectorXi proportions(int n_seed, double D) {
     int real_length_y = 120;
     const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
-    double dt = 0.01; // time step
+    double dt = 0.05; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
@@ -49,7 +50,7 @@ VectorXi proportions(int n_seed, double D) {
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
 
-    //double D =1.0;//0.001; // diffusion coefficient for Brownian motion
+    double D =0.0;//0.001; // diffusion coefficient for Brownian motion
 
     // CiL and CoA paramters, Lennard Jones
     vdouble2 sum_forces; // some of all the forces exerted on one cell, always set to zero for a new cell
@@ -323,6 +324,14 @@ VectorXi proportions(int n_seed, double D) {
 
     }
 
+//            // convergence, check cell positions
+            cout << get<position>(particles[0]) << endl;
+            cout << get<position>(particles[10]) << endl;
+            cout << get<position>(particles[20]) << endl;
+            cout << get<position>(particles[30]) << endl;
+            cout << get<position>(particles[40]) << endl;
+
+
 
 //    // Mayor leaders and followers
 //
@@ -369,9 +378,9 @@ VectorXi proportions(int n_seed, double D) {
     int countcellsinarches = 0;
 
     //for each timestep
-//    while (t < final_time) {
+//     while (t < final_time) {
     //while (furthestCell < 1000.0) {
-     while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+    while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
 //       while (particles.size() > 10){
         // Mayor comment this
 //        //      insert new cells
@@ -809,19 +818,28 @@ VectorXi proportions(int n_seed, double D) {
 
         if (counter % int(60.0/dt ) == 0) { //  60/dt
 
-        
+
+
         //    if (t <1078){
             //if (furthestCell > 980) { // for the one to see how long it takes till they reach the end
 
-////
+
            //      save at every time step
-            #ifdef HAVE_VTK
-                vtkWriteGrid("CellsCHECK", t, particles.get_grid(true));
-            #endif
+//            #ifdef HAVE_VTK
+//                vtkWriteGrid("CellsCHECKNEW7n", t, particles.get_grid(true));
+//            #endif
 
 
 //           // }
 //////
+
+            // convergence, check cell positions
+
+            cout << get<position>(particles[0]) << endl;
+            cout << get<position>(particles[10]) << endl;
+            cout << get<position>(particles[20]) << endl;
+            cout << get<position>(particles[30]) << endl;
+            cout << get<position>(particles[40]) << endl;
 
             // for the one to see how long it takes till they reach the end
 //        // postion of five cells at the front
@@ -997,27 +1015,29 @@ VectorXi proportions(int n_seed, double D) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 20;
+    const int sim_num = 1;
 
-    VectorXi vector_check_length = proportions(0,15.0); //just to know what the length is
-    cout << "ignore above" << endl;
+    VectorXi vector_check_length = proportions(7); //just to know what the length is
+    //cout << "ignore above" << endl;
 //
     int num_parts = vector_check_length.size(); // number of parts that I partition my domain
 //    cout << "length " << vector_check_length.size() << endl;
     //   int num_parts = 20; // for 1800 timesteps
     MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
 
- //    n would correspond to different seeds
-    double D;
-    for (int i=1; i < 6; i++){
-        if (i==1){
-            D=1.0;
-        }else{
-            D=double((i-1)*3);
-        }
-        cout << "D = " << D << endl;
+//looping through D
+//    double D;
+//    for (int i=1; i < 6; i++){
+//        if (i==1){
+//            D=1.0;
+//        }else{
+//            D=double((i-1)*3);
+//        }
+//        //cout << "D = " << D << endl;
 
 
+
+      //    n would correspond to different seeds
         ////     parallel programming
 #pragma omp parallel for
         for (int n = 1; n < sim_num; n++) {
@@ -1026,8 +1046,8 @@ int main() {
             //initialise the matrix to store the values
             MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
 
-
-            numbers.block(0, 0, num_parts, 1) = proportions( n,D);
+            cout << " n = " << n << endl;
+            numbers.block(0, 0, num_parts, 1) = proportions( n);
 
 //        // This is what I am using for MATLAB
 //        ofstream output2("sepdataChickD10eps10CoACiLGROWINGDOMAIN" + to_string(n) + ".csv");
@@ -1046,8 +1066,8 @@ int main() {
 
         }
 
+//}// looping thorugh D
 
-    }
 
 
 
