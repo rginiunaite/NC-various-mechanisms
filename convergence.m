@@ -47,13 +47,14 @@ for i=1:5
 end
 
 
- xlabel('time, hrs','FontSize',14)
+ xlabel('Time, hrs','FontSize',36)
 % ylabel('positions, ',14)
- ylabel(['Positions, ',char(181),'m'],'FontSize',14)
+ 
  
  %ylim([1,6]);
   box on
  set(gca,'FontSize',36)
+ ylabel(['Distance from the neural tube, ',char(181),'m'],'FontSize',34)
  ax = gca;
  set(gca,'linewidth',4) 
  

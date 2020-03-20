@@ -38,19 +38,19 @@ VectorXi proportions(int n_seed) {
     int real_length_y = 120;
     const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
-    double dt = 0.05; // time step
+    double dt = 0.1; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = 0.02;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
-    double mean = 0.02;//0.001;//1;//
+    double meanL = 0.0;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
+    double mean = 0.0;//2;//0.001;//1;//
     double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
 
-    double D =0.0;//0.001; // diffusion coefficient for Brownian motion
+    double D =5.0;//0.001; // diffusion coefficient for Brownian motion
 
     // CiL and CoA paramters, Lennard Jones
     vdouble2 sum_forces; // some of all the forces exerted on one cell, always set to zero for a new cell
@@ -325,12 +325,26 @@ VectorXi proportions(int n_seed) {
     }
 
 //            // convergence, check cell positions
-            cout << get<position>(particles[0]) << endl;
-            cout << get<position>(particles[10]) << endl;
-            cout << get<position>(particles[20]) << endl;
-            cout << get<position>(particles[30]) << endl;
-            cout << get<position>(particles[40]) << endl;
+//            cout << get<position>(particles[0]) << endl;
+//            cout << get<position>(particles[10]) << endl;
+//            cout << get<position>(particles[20]) << endl;
+//            cout << get<position>(particles[30]) << endl;
+//            cout << get<position>(particles[40]) << endl;
 
+            // check the centre of mass
+            double centre_of_mass =0 ;
+            vdouble2 cellpos;
+
+            for (int i = 0; i < particles.size(); i++){
+
+                cellpos = get<position>(particles[i]);
+
+                centre_of_mass += cellpos[0];
+
+            }
+
+            centre_of_mass = centre_of_mass/particles.size();
+            cout << centre_of_mass << endl;
 
 
 //    // Mayor leaders and followers
@@ -380,7 +394,8 @@ VectorXi proportions(int n_seed) {
     //for each timestep
 //     while (t < final_time) {
     //while (furthestCell < 1000.0) {
-    while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+    //  while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+   while (t < 1190.0){ // for twenty hours
 //       while (particles.size() > 10){
         // Mayor comment this
 //        //      insert new cells
@@ -835,11 +850,27 @@ VectorXi proportions(int n_seed) {
 
             // convergence, check cell positions
 
-            cout << get<position>(particles[0]) << endl;
-            cout << get<position>(particles[10]) << endl;
-            cout << get<position>(particles[20]) << endl;
-            cout << get<position>(particles[30]) << endl;
-            cout << get<position>(particles[40]) << endl;
+//            cout << get<position>(particles[0]) << endl;
+//            cout << get<position>(particles[10]) << endl;
+//            cout << get<position>(particles[20]) << endl;
+//            cout << get<position>(particles[30]) << endl;
+//            cout << get<position>(particles[40]) << endl;
+
+            double centre_of_mass =0 ;
+            vdouble2 cellpos;
+
+            for (int i = 0; i < particles.size(); i++){
+
+                cellpos = get<position>(particles[i]);
+
+                centre_of_mass += cellpos[0];
+
+            }
+
+            centre_of_mass = centre_of_mass/particles.size();
+            cout << centre_of_mass << endl;
+
+
 
             // for the one to see how long it takes till they reach the end
 //        // postion of five cells at the front
@@ -876,7 +907,7 @@ VectorXi proportions(int n_seed) {
         //cout << "Final t " << t << endl;
     }
 
-   cout << t << endl;
+//   cout << t << endl;
 
 //    // calculate pairwise distances at the end of simulations
 ////
@@ -1015,9 +1046,9 @@ VectorXi proportions(int n_seed) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
+    const int sim_num = 21;
 
-    VectorXi vector_check_length = proportions(7); //just to know what the length is
+    VectorXi vector_check_length = proportions(1); //just to know what the length is
     //cout << "ignore above" << endl;
 //
     int num_parts = vector_check_length.size(); // number of parts that I partition my domain
@@ -1039,14 +1070,14 @@ int main() {
 
       //    n would correspond to different seeds
         ////     parallel programming
-#pragma omp parallel for
-        for (int n = 1; n < sim_num; n++) {
+//#pragma omp parallel for
+        for (int n = 2; n < sim_num; n++) {
 
 
             //initialise the matrix to store the values
             MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
 
-            cout << " n = " << n << endl;
+            //cout << " n = " << n << endl;
             numbers.block(0, 0, num_parts, 1) = proportions( n);
 
 //        // This is what I am using for MATLAB
