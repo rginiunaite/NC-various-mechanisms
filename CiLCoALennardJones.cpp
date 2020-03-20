@@ -394,8 +394,8 @@ VectorXi proportions(int n_seed) {
     //for each timestep
 //     while (t < final_time) {
     //while (furthestCell < 1000.0) {
-    //  while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
-   while (t < 1190.0){ // for twenty hours
+      while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+ //  while (t < 1190.0){ // for twenty hours
 //       while (particles.size() > 10){
         // Mayor comment this
 //        //      insert new cells
@@ -1046,9 +1046,9 @@ VectorXi proportions(int n_seed) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 21;
+    const int sim_num = 20;
 
-    VectorXi vector_check_length = proportions(1); //just to know what the length is
+    VectorXi vector_check_length = proportions(0); //just to know what the length is
     //cout << "ignore above" << endl;
 //
     int num_parts = vector_check_length.size(); // number of parts that I partition my domain
@@ -1070,8 +1070,8 @@ int main() {
 
       //    n would correspond to different seeds
         ////     parallel programming
-//#pragma omp parallel for
-        for (int n = 2; n < sim_num; n++) {
+#pragma omp parallel for
+        for (int n = 1; n < sim_num; n++) {
 
 
             //initialise the matrix to store the values
