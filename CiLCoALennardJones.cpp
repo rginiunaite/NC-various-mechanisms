@@ -20,10 +20,10 @@ using namespace Eigen; // objects VectorXd, MatrixXd
 
 
 //VectorXi proportions(int n_seed, double D) {
-VectorXi proportions(int n_seed) {
+VectorXi proportions(int n_seed, double beta) {
 
     bool domain_growth = false; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = false;
+    bool CiLonly = true;
 
     int length_x;
     if (domain_growth == false) {
@@ -38,19 +38,19 @@ VectorXi proportions(int n_seed) {
     int real_length_y = 120;
     const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
-    double dt = 0.1; // time step
+    double dt = 0.01; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = 0.0;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
-    double mean = 0.0;//2;//0.001;//1;//
+    double meanL = beta;//0.02;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
+    double mean = beta;//0.02;//2;//0.001;//1;//
     double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
 
-    double D =5.0;//0.001; // diffusion coefficient for Brownian motion
+    double D = 5.0;//0.001; // diffusion coefficient for Brownian motion
 
     // CiL and CoA paramters, Lennard Jones
     vdouble2 sum_forces; // some of all the forces exerted on one cell, always set to zero for a new cell
@@ -62,7 +62,7 @@ VectorXi proportions(int n_seed) {
     double sigma_max = diameter;//15.0; // cell diamter ( don't know why I wrote this before: maximum distance at which the cells can have an effect on each other)
     double search_param = 100.0;//100.0;//Mayor , ours 50.0 //radius to search for cell-cell interactions
     double f0 = 1.0;//1 before strength of the force
-    double eps_ij = 200.0; // depth of potential well, Lennard-Jones
+    double eps_ij = 250.0; // depth of potential well, Lennard-Jones
 
     double a = 0.5; // Morse parameter
     vdouble2 force_ij; // store the value of force
@@ -344,7 +344,7 @@ VectorXi proportions(int n_seed) {
             }
 
             centre_of_mass = centre_of_mass/particles.size();
-            cout << centre_of_mass << endl;
+            //cout << centre_of_mass << endl;
 
 
 //    // Mayor leaders and followers
@@ -394,7 +394,7 @@ VectorXi proportions(int n_seed) {
     //for each timestep
 //     while (t < final_time) {
     //while (furthestCell < 1000.0) {
-      while (countcellsinarches < 41){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+      while (countcellsinarches < 41 && t < 8000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
  //  while (t < 1190.0){ // for twenty hours
 //       while (particles.size() > 10){
         // Mayor comment this
@@ -868,7 +868,7 @@ VectorXi proportions(int n_seed) {
             }
 
             centre_of_mass = centre_of_mass/particles.size();
-            cout << centre_of_mass << endl;
+            //cout << centre_of_mass << endl;
 
 
 
@@ -907,7 +907,8 @@ VectorXi proportions(int n_seed) {
         //cout << "Final t " << t << endl;
     }
 
-//   cout << t << endl;
+  // cout << n_seed << endl;
+   cout << t << endl;
 
 //    // calculate pairwise distances at the end of simulations
 ////
@@ -1048,8 +1049,8 @@ int main() {
     const int number_parameters = 1; // parameter range
     const int sim_num = 20;
 
-    VectorXi vector_check_length = proportions(0); //just to know what the length is
-    //cout << "ignore above" << endl;
+    VectorXi vector_check_length = proportions(1,1.0); //just to know what the length is
+    cout << "ignore above" << endl;
 //
     int num_parts = vector_check_length.size(); // number of parts that I partition my domain
 //    cout << "length " << vector_check_length.size() << endl;
@@ -1064,8 +1065,12 @@ int main() {
 //        }else{
 //            D=double((i-1)*3);
 //        }
-//        //cout << "D = " << D << endl;
-
+//        cout << "D = " << D << endl;
+// looping through beta
+    double beta = 0.02;
+    for (int i=2; i < 6; i++){
+        beta = 0.01 * double(i);
+        cout << "beta = " << beta << endl;
 
 
       //    n would correspond to different seeds
@@ -1078,7 +1083,7 @@ int main() {
             MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
 
             //cout << " n = " << n << endl;
-            numbers.block(0, 0, num_parts, 1) = proportions( n);
+            numbers.block(0, 0, num_parts, 1) = proportions( n, beta);
 
 //        // This is what I am using for MATLAB
 //        ofstream output2("sepdataChickD10eps10CoACiLGROWINGDOMAIN" + to_string(n) + ".csv");
@@ -1097,7 +1102,7 @@ int main() {
 
         }
 
-//}// looping thorugh D
+}// looping through D or beta
 
 
 
