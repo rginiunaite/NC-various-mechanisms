@@ -19,7 +19,7 @@ using namespace Aboria;
 using namespace Eigen; // objects VectorXd, MatrixXd
 
 
-double proportions(int n_seed, double D) {
+double proportions(int n_seed) {
 //VectorXi proportions(int n_seed, double beta) {
 //double proportions(int n_seed, double beta) {
 
@@ -39,19 +39,19 @@ double proportions(int n_seed, double D) {
     int real_length_y = 120;
     const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
-    double dt = 0.01; // time step
+    double dt = 1.0;//00625; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL =0.0;//0.02;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
-    double mean = 0.0;//0.02;//2;//0.001;//1;//
+    double meanL =0.0;//2;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
+    double mean = 0.0;//2;//2;//0.02;//2;//0.001;//1;//
     double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
 
-    //double D = 5.0;//0.001; // diffusion coefficient for Brownian motion
+    double D = 5.0;//0.001; // diffusion coefficient for Brownian motion
 
     // CiL and CoA paramters, Lennard Jones
     vdouble2 sum_forces; // some of all the forces exerted on one cell, always set to zero for a new cell
@@ -63,7 +63,7 @@ double proportions(int n_seed, double D) {
     double sigma_max = diameter;//15.0; // cell diamter ( don't know why I wrote this before: maximum distance at which the cells can have an effect on each other)
     double search_param = 100.0;//100.0;//Mayor , ours 50.0 //radius to search for cell-cell interactions
     double f0 = 1.0;//1 before strength of the force
-    double eps_ij = 250.0; // depth of potential well, Lennard-Jones
+    double eps_ij = 200.0; // depth of potential well, Lennard-Jones
 
     double a = 0.5; // Morse parameter
     vdouble2 force_ij; // store the value of force
@@ -333,7 +333,8 @@ double proportions(int n_seed, double D) {
 //            cout << get<position>(particles[40]) << endl;
 
             // check the centre of mass
-            double centre_of_mass =0 ;
+            VectorXd MassCentreVector = VectorXd::Zero(20);
+            double centre_of_mass =0;
             vdouble2 cellpos;
 
             for (int i = 0; i < particles.size(); i++){
@@ -345,8 +346,10 @@ double proportions(int n_seed, double D) {
             }
 
             centre_of_mass = centre_of_mass/particles.size();
-            //cout << centre_of_mass << endl;
 
+            MassCentreVector[0] = centre_of_mass;
+            //cout << centre_of_mass << endl;
+            int imass = 1; // this is to fill in the imass vector
 
 //    // Mayor leaders and followers
 //
@@ -391,12 +394,27 @@ double proportions(int n_seed, double D) {
     int counttrue = 0;
 
     int countcellsinarches = 0;
+    VectorXd normalXvalues =VectorXd::Zero(int((1190.0/dt)*50.0));
+    VectorXd normalYvalues =VectorXd::Zero(int((1190.0/dt)*50.0));
+
+    ofstream outputNX("NormalX.csv"); //
+    ofstream outputNY("NormalY.csv"); // a
+
+    for( auto ic=0; ic < normalXvalues.rows(); ++ic ){
+        normalXvalues[ic] = normalX(gen1);
+        outputNX << normalXvalues[ic] << endl;
+        normalYvalues[ic] = normalY(gen1);
+        outputNY << normalYvalues[ic] << endl;
+    }
+
+
+        cout << "past this " << endl;
 
     //for each timestep
 //     while (t < final_time) {
     //while (furthestCell < 1000.0) {
-      while (countcellsinarches < 41 && t < 3000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
- //  while (t < 1190.0){ // for twenty hours
+    //      while (countcellsinarches < 41 && t < 3000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+       while (t < 1190.0){ // for twenty hours (1190.0) , 11hrs 610
 //       while (particles.size() > 10){
 
         // Mayor comment this
@@ -834,7 +852,7 @@ double proportions(int n_seed, double D) {
 
 
         if (counter % int(60.0/dt ) == 0) { //  60/dt
-
+            cout << "past this " << counter << endl;
 
 
         //    if (t <1078){
@@ -843,7 +861,7 @@ double proportions(int n_seed, double D) {
 
            //      save at every time step
 //            #ifdef HAVE_VTK
-//                vtkWriteGrid("CellsCHECKNEW7n", t, particles.get_grid(true));
+//                vtkWriteGrid("Cellseps200D1nseed16stuck", t, particles.get_grid(true));
 //            #endif
 
 
@@ -858,6 +876,8 @@ double proportions(int n_seed, double D) {
 //            cout << get<position>(particles[30]) << endl;
 //            cout << get<position>(particles[40]) << endl;
 
+                // centre of mass
+
             double centre_of_mass =0 ;
             vdouble2 cellpos;
 
@@ -870,7 +890,9 @@ double proportions(int n_seed, double D) {
             }
 
             centre_of_mass = centre_of_mass/particles.size();
-            //cout << centre_of_mass << endl;
+            MassCentreVector[imass] = centre_of_mass;
+            imass = imass+1;
+//            cout << centre_of_mass << endl;
 
 
 
@@ -909,8 +931,30 @@ double proportions(int n_seed, double D) {
         //cout << "Final t " << t << endl;
     }
 
+//    double centre_of_mass =0 ;
+//    vdouble2 cellpos;
+//
+//    for (int i = 0; i < particles.size(); i++){
+//
+//        cellpos = get<position>(particles[i]);
+//
+//        centre_of_mass += cellpos[0];
+//
+//    }
+//
+//    centre_of_mass = centre_of_mass/particles.size();
+//    cout << centre_of_mass << endl;
+
+
+//cout << MassCentreVector << endl;
+cout << "here "<< endl;
+cout << "X" << normalXvalues << endl;
+
+cout << "Y" << normalYvalues << endl;
+
+
   // cout << n_seed << endl;
-   cout << t << endl;
+  //cout << t << endl;
 
 //    // calculate pairwise distances at the end of simulations
 ////
@@ -1040,7 +1084,7 @@ double proportions(int n_seed, double D) {
 
 
     //return proportions;
-        return t;
+     //   return t;
 }
 
 
@@ -1049,9 +1093,9 @@ double proportions(int n_seed, double D) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 20;
+    const int sim_num = 1;
 
-    //VectorXi vector_check_length = proportions(1,1.0); //just to know what the length is
+   //double vector_check_length = proportions(16); //just to know what the length is
    // cout << "ignore above" << endl;
 //
     //int num_parts = vector_check_length.size(); // number of parts that I partition my domain
@@ -1059,15 +1103,15 @@ int main() {
     //int num_parts = 17; // for 1800 timesteps
     //MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
 
-//looping through D
-    double D;
-    for (int i=1; i < 7; i++){
-        if (i==1){
-            D=1.0;
-        }else{
-            D=double((i-1)*3);
-        }
-        cout << "D = " << D << endl;
+////looping through D
+//    double D;
+//    for (int i=1; i < 6; i++){
+//        if (i==1){
+//            D=1.0;
+//        }else{
+//            D=double((i-1)*3);
+//        }
+//        cout << "D = " << D << endl;
 //// looping through beta
 //    double beta;
 //    for (int i=1; i < 6; i++){
@@ -1078,16 +1122,17 @@ int main() {
       //    n would correspond to different seeds
         ////     parallel programming
 
-        VectorXd output = VectorXd::Zero(sim_num);
-#pragma omp parallel for
-        for (int n = 1; n < sim_num; n++) {
+       // VectorXd output = VectorXd::Zero(sim_num);
+        double output;
+       #pragma omp parallel for
+        for (int n = 0; n < sim_num; n++) {
 
 
             //initialise the matrix to store the values
             //MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
 
             //cout << " n = " << n << endl;
-            output[i] = proportions( n, D);
+            output = proportions( n);
 
 //        // This is what I am using for MATLAB
 //        ofstream output2("sepdataChickD10eps10CoACiLGROWINGDOMAIN" + to_string(n) + ".csv");
@@ -1106,7 +1151,7 @@ int main() {
 
         }
 
-}// looping through D or beta
+//}// looping through D or beta
 
 
 
