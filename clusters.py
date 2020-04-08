@@ -18,12 +18,16 @@ from sklearn.datasets import make_classification
 from sklearn.cluster import Birch
 from sklearn.cluster import MeanShift
 
+import scipy
+import scipy.cluster.vq
+import scipy.spatial.distance
+dst = scipy.spatial.distance.euclidean
 
 def readcsv(filename):
     data = pd.read_csv(filename) #Please add four spaces here before this line
     return(np.array(data))
 
-yourArray = readcsv('positionsHalfbreak.csv')
+yourArray = readcsv('positionsVerycont.csv')
 
 # with open('positions.csv') as csvfile:
 #     readCSV = (csv.reader(csvfile, delimiter=','))
@@ -121,6 +125,10 @@ X = yourArray[:,[1,2]]
 
 ## gap statistic
 
+## Version 1
+
+
+
 
 plt.figure(figsize=(12, 3))
 for k in range(1,6):
@@ -128,8 +136,10 @@ for k in range(1,6):
     a = kmeans.fit_predict(X)
     plt.subplot(1,5,k)
     plt.scatter(X[:, 0], X[:, 1], c=a)
-    plt.xlabel('k='+str(k))
-plt.tight_layout()
+    plt.xlabel('k='+str(k),fontsize = 16)
+
+#plt.tight_layout()
+
 plt.show()
 
 
@@ -137,14 +147,30 @@ def compute_inertia(a, y):
 	W = [np.mean(pairwise_distances(y[a == c, :])) for c in np.unique(a)]
 	return np.mean(W)
 
+def bounding_box(X):
+    xmin, xmax = min(X,key=lambda a:a[0])[0], max(X,key=lambda a:a[0])[0]
+    ymin, ymax = min(X,key=lambda a:a[1])[1], max(X,key=lambda a:a[1])[1]
+    return (xmin,xmax), (ymin,ymax)
+
 
 def compute_gap(clustering, data, k_max=5, n_references=5):
-	if len(data.shape) == 1:
-		data = data.reshape(-1, 1)
-	reference = np.random.rand(*data.shape)
+	(xmin, xmax), (ymin, ymax) = bounding_box(X)
+	# Create B reference datasets
+	B = 5
+
+	for i in range(B):
+		Xb = []
+		for n in range(len(X)):
+			Xb.append([np.random.uniform(xmin, xmax),
+					   np.random.uniform(ymin, ymax)])
+		Xb = np.array(Xb)
+	# if len(data.shape) == 1:
+	# 	data = data.reshape(-1, 1)
+	# reference = np.random.uniform( (xmin,xmax) ,*data.shape)
+	reference = Xb
 	print("referce")
 	print(reference)
-	reference = reference 
+
 	reference_inertia = []
 	for k in range(1, k_max + 1):
 		local_inertia = []
@@ -171,18 +197,28 @@ k_max = 5
 gap, reference_inertia, ondata_inertia = compute_gap(KMeans(), X, k_max)
 
 plt.plot(range(1, k_max + 1), reference_inertia,
-		 '-o', label='reference')
+		 '--o', label='reference')
 plt.plot(range(1, k_max + 1), ondata_inertia,
 		 '-o', label='data')
-plt.xlabel('k')
-plt.ylabel('log(inertia)')
+plt.xlabel('k',fontsize = 16)
+plt.ylabel('log(inertia)',fontsize = 16)
+plt.xticks(fontsize=16)
+plt.xticks(np.arange(0, 7, step=1))
+plt.yticks(fontsize=16)
+plt.grid(True)
+plt.legend(fontsize=16)
 plt.show()
 
 
 # plot gap
 plt.plot(range(1, k_max+1), gap, '-o')
-plt.ylabel('gap')
-plt.xlabel('k')
-plt.ylim((-6.6,-5.5))
-
+plt.ylabel('gap',fontsize = 16)
+plt.xlabel('k', fontsize = 16)
+# plt.ylim((-6.6,-5.5))
+plt.xticks(fontsize=16)
+plt.xticks(np.arange(0, 7, step=1))
+plt.yticks(fontsize=16)
+plt.grid(True)
 plt.show()
+
+
