@@ -20,13 +20,13 @@ using namespace Aboria;
 using namespace Eigen; // objects VectorXd, MatrixXd
 
 
-//VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
-double proportions(int n_seed, double D, double eps_ij, double beta) {
+VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
+//double proportions(int n_seed, double D, double eps_ij, double beta) {
 //VectorXi proportions(int n_seed, double beta) {
 //double proportions(int n_seed, double beta) {
 
     bool domain_growth = true; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = false;
+    bool CiLonly = true;
 
     int length_x;
     if (domain_growth == false) {
@@ -46,8 +46,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = beta;//0.02;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
-    double mean = beta; //0.02;//2;//0.001;//1;//
+    double meanL = beta*sqrt(dt);;//beta;//0.02 // mean movement in x velocity for leaders
+    double mean = beta*sqrt(dt);;//beta; //0.02; // mean for all other cells
     double cell_radius = 7.5;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
@@ -397,7 +397,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
     //for each timestep
-     while (t < final_time && countcellsinarches < 5) {
+     while (t < final_time){//  && countcellsinarches < 5) { // the second part is to check time to invasion: for whether invasion does not happen too early!!!
     //while (furthestCell < 1000.0) {
     //     while (countcellsinarches < 41 && t < 3000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
  //  while (t < 1190.0){ // for twenty hours
@@ -405,7 +405,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
         // Mayor comment this
         //      insert new cells
-        //if (particles.size()<25) {
+        if (particles.size()<50) {
         //if (counter % 100 == 0){
         bool free_position = true;
         particle_type::value_type f;
@@ -435,8 +435,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
         particles.update_positions();
-        //}
-//        // end of insert new cells
+        }
+        // end of insert new cells
         t = t + dt;
 
         counter = counter + 1;
@@ -840,14 +840,13 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
         if (counter % int(60.0/dt ) == 0) { //  60/dt
 
 
-
             //if (t >1000){
             //if (furthestCell > 980) { // for the one to see how long it takes till they reach the end
 
 
             //     save at every time step
 //            #ifdef HAVE_VTK
-//                vtkWriteGrid(".//100sim DATA Parameter Sensitivity Chick Images//CellsALLBIASED3D75p0eps0n", t, particles.get_grid(true));
+//                vtkWriteGrid(".//100sim DATA Parameter Sensitivity Chick Images//CellsRepulsionReducedInflux12D19p0eps0n", t, particles.get_grid(true));
 //            #endif
 
  // 94, D=1
@@ -926,7 +925,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     }
 
   // cout << n_seed << endl;
-  cout << t << endl;
+  //cout << t << endl; // !!FORTIME TO INVASION
 
 //    // calculate pairwise distances at the end of simulations
 ////
@@ -1071,7 +1070,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 //    }
 
 
-   //return proportions;
+   return proportions;
 
 }
 
@@ -1083,28 +1082,28 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1; // it used to be 20 here
-    double eps = 19.0; // 0.4, 19.0, 38.0, 56.0, 75.0, 94.0
+    const int sim_num = 100; // it used to be 20 here
+    double eps = 94.0; // 0.4, 19.0, 38.0, 56.0, 75.0, 94.0
     //VectorXi vector_check_length = proportions(1,1.0); //just to know what the length is
     //cout << "ignore above" << endl;
 //
-  //  int num_parts = vector_check_length.size(); // number of parts that I partition my domain
-  // cout << "length " << vector_check_length.size() << endl;
-       int num_parts = 11; // for 1080 timesteps
+ //   int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+ //  cout << "length " << vector_check_length.size() << endl;
+     int num_parts = 11; // for 1080 timesteps
     MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
 
 //looping through D
-    double D = 15.0;
-//    for (int i=1; i < 7; i++) {
-//        if (i == 1) {
-//            D = 1.0;
-//        } else {
-//            D = double((i - 1) * 3);
-//        }
-//        //cout << "D = " << D << endl;
+    double D = 12.0;
+    for (int i=1; i < 7; i++) {
+        if (i == 1) {
+            D = 1.0;
+        } else {
+            D = double((i - 1) * 3);
+        }
+    //    cout << "D = " << D << endl;
 
 // looping through beta
-    double beta = 0.02;//0.02;
+    double beta = 0.0;//0.02;
 //    for (int i=1; i < 6; i++){
 //        beta = 0.01 * double(i);
         //cout << "beta = " << beta << endl;
@@ -1125,12 +1124,15 @@ int main() {
 
 
         //cout << " n = " << n << endl;
-        //numbers.block(0, 0, num_parts, 1) = proportions( n, D, eps, beta); // when check proportions
-        timebutnothing = proportions( n, D, eps, beta); // when check proportions
+        numbers.block(0, 0, num_parts, 1) = proportions( n, D, eps, beta); // when check proportions
+        //timebutnothing = proportions( n, D, eps, beta); // when check proportions
 
         // This is what I am using for MATLAB
        //ofstream output2("AttrRepLEADONLYVARYbetasepdataChiceps" +to_string(int(eps)) + "beta" + to_string(int(beta*100)) + "nvalue" + to_string(n) + ".csv");
        //ofstream output2(".//Rep Only Chick Data Files//RepOnlyVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+      //ofstream output2(".//Rep Only Chick Data Files//RepOnlyNOGROWTHVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+        ofstream output2(".//Rep Only Chick Data Files//RepOnlyREDUCEDINFLUX50cellsVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+
         //ofstream output2(".//Attr Rep Chick Data Files//AttrRepVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
 //        ofstream output2(".//Attr Rep LEAD ONLY Chick Data Files//AttrRepLEADONLYVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
 //        //
@@ -1166,5 +1168,5 @@ int main() {
 //        output3 << "\n" << endl;
 //    }
 
-//}// looping thorugh D or beta
+}// looping thorugh D or beta
 }

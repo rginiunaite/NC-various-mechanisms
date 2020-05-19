@@ -14,13 +14,15 @@
 #include <assert.h>
 
 
+
 using namespace std;
 using namespace Aboria;
 using namespace Eigen; // objects VectorXd, MatrixXd
 
 
-double proportions(int n_seed) {
-//VectorXi proportions(int n_seed, double beta) {
+//double proportions(int n_seed) {
+double proportions(int n_seed, double D, double eps_ij, double beta) {
+    //VectorXi proportions(int n_seed, double beta) {
 //double proportions(int n_seed, double beta) {
 
     bool domain_growth = false; // if false change length_x to 1100, true 300, Mayor false
@@ -39,19 +41,20 @@ double proportions(int n_seed) {
     int real_length_y = 120;
     const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
-    double dt = 1.0;//00625; // time step
+    double dt = 0.0025;//00625; // time step
+    double dt_min = 0.00125;//00625; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL =0.0;//2;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
-    double mean = 0.0;//2;//2;//0.02;//2;//0.001;//1;//
+    double meanL = beta*sqrt(dt);//2;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
+    double mean = beta*sqrt(dt);//2;//2;//0.02;//2;//0.001;//1;//
     double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
 
-    double D = 5.0;//0.001; // diffusion coefficient for Brownian motion
+    //double D = 5.0;//0.001; // diffusion coefficient for Brownian motion
 
     // CiL and CoA paramters, Lennard Jones
     vdouble2 sum_forces; // some of all the forces exerted on one cell, always set to zero for a new cell
@@ -63,7 +66,7 @@ double proportions(int n_seed) {
     double sigma_max = diameter;//15.0; // cell diamter ( don't know why I wrote this before: maximum distance at which the cells can have an effect on each other)
     double search_param = 100.0;//100.0;//Mayor , ours 50.0 //radius to search for cell-cell interactions
     double f0 = 1.0;//1 before strength of the force
-    double eps_ij = 200.0; // depth of potential well, Lennard-Jones
+    //double eps_ij = 200.0; // depth of potential well, Lennard-Jones
 
     double a = 0.5; // Morse parameter
     vdouble2 force_ij; // store the value of force
@@ -178,7 +181,7 @@ double proportions(int n_seed) {
 
 
     // initialise the number of particles
-    particle_type particles(10*N); // Mayor 10*N, ours N
+    particle_type particles(N); // Mayor 10*N, ours N
 
     // initialise random number generator for particles entering the domain, appearing at the start in x and uniformly in y
     std::default_random_engine gen;
@@ -209,40 +212,40 @@ double proportions(int n_seed) {
             //get<type>(particles[i]) = 0; // leaders, Mayor, comment
 
 //////// Mayor below this
-            get<position>(particles[i+5]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                0.5 * double(length_y - 1) /
-                                                                double(N)); // x=radius, uniformly in y
-
-
-            get<position>(particles[i+10]) = vdouble2(5*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                0.5 * double(length_y - 1) /
-                                                                double(N)); // x=radius, uniformly in y
-
-
-            get<position>(particles[i+15]) = vdouble2(7*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                            0.5 * double(length_y - 1) /
-                                                            double(N)); // x=radius, uniformly in y
-
-            get<position>(particles[i+20]) = vdouble2(9*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                 0.5 * double(length_y - 1) /
-                                                                 double(N)); // x=radius, uniformly in y
-        get<position>(particles[i+25]) = vdouble2(11*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                 0.5 * double(length_y - 1) /
-                                                                 double(N)); // x=radius, uniformly in y
-        get<position>(particles[i+30]) = vdouble2(13*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                 0.5 * double(length_y - 1) /
-                                                                 double(N)); // x=radius, uniformly in y
-        get<position>(particles[i+35]) = vdouble2(15*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                 0.5 * double(length_y - 1) /
-                                                                 double(N)); // x=radius, uniformly in y
-        get<position>(particles[i+40]) = vdouble2(17*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                 0.5 * double(length_y - 1) /
-                                                                 double(N)); // x=radius, uniformly in y
-        get<position>(particles[i+45]) = vdouble2(19*positions, (i + 1) * double(length_y - 1) / double(N) -
-                                                                 0.5 * double(length_y - 1) /
-                                                                 double(N)); // x=radius, uniformly in y
-
-//         narrow domain, NarrowDomain uncomment below
+//            get<position>(particles[i+5]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                0.5 * double(length_y - 1) /
+//                                                                double(N)); // x=radius, uniformly in y
+//
+//
+//            get<position>(particles[i+10]) = vdouble2(5*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                0.5 * double(length_y - 1) /
+//                                                                double(N)); // x=radius, uniformly in y
+//
+//
+//            get<position>(particles[i+15]) = vdouble2(7*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                            0.5 * double(length_y - 1) /
+//                                                            double(N)); // x=radius, uniformly in y
+//
+//            get<position>(particles[i+20]) = vdouble2(9*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                 0.5 * double(length_y - 1) /
+//                                                                 double(N)); // x=radius, uniformly in y
+//            get<position>(particles[i+25]) = vdouble2(11*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                     0.5 * double(length_y - 1) /
+//                                                                     double(N)); // x=radius, uniformly in y
+//            get<position>(particles[i+30]) = vdouble2(13*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                     0.5 * double(length_y - 1) /
+//                                                                     double(N)); // x=radius, uniformly in y
+//            get<position>(particles[i+35]) = vdouble2(15*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                     0.5 * double(length_y - 1) /
+//                                                                     double(N)); // x=radius, uniformly in y
+//            get<position>(particles[i+40]) = vdouble2(17*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                     0.5 * double(length_y - 1) /
+//                                                                     double(N)); // x=radius, uniformly in y
+//            get<position>(particles[i+45]) = vdouble2(19*positions, (i + 1) * double(length_y - 1) / double(N) -
+//                                                                     0.5 * double(length_y - 1) /
+//                                                                     double(N)); // x=radius, uniformly in y
+//
+////         narrow domain, NarrowDomain uncomment below
 //
 //        // Mayor below this
 //        get<position>(particles[i+3]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
@@ -333,7 +336,7 @@ double proportions(int n_seed) {
 //            cout << get<position>(particles[40]) << endl;
 
             // check the centre of mass
-            VectorXd MassCentreVector = VectorXd::Zero(20);
+            VectorXd MassCentreVector = VectorXd::Zero(7);
             double centre_of_mass =0;
             vdouble2 cellpos;
 
@@ -348,6 +351,7 @@ double proportions(int n_seed) {
             centre_of_mass = centre_of_mass/particles.size();
 
             MassCentreVector[0] = centre_of_mass;
+
             //cout << centre_of_mass << endl;
             int imass = 1; // this is to fill in the imass vector
 
@@ -386,35 +390,57 @@ double proportions(int n_seed) {
     //std::normal_distribution<double> normal(M_PI/2,sigma); // normal distribution for filopodia
 
     // for Lennard-Jones
-    std::normal_distribution<double> normalXlead(meanL,1.0); // mean specified variance 1
-    std::normal_distribution<double> normalX(mean,1.0); // mean 0 variance 1
-    std::normal_distribution<double> normalY(0.0,1.0); // mean 0 variance 1
+    std::normal_distribution<double> normalXlead(meanL,dt_min*1.0); // mean specified variance 1
+    std::normal_distribution<double> normalX(mean,dt_min*1.0); // mean 0 variance 1
+    std::normal_distribution<double> normalY(0.0,dt_min*1.0); // mean 0 variance 1
+
+
+//    ifstream myfile ("RandomNormalDt0p00125.csv");
+//    //myfile.open ("RandomNormalDt0p00125.csv, ios::out | ios::app | ios::binary);
+//
+////    CvMLData dataFile;
+////    VectorXd randomnumbers = dataFile.read_csv("RandomNormalDt0p00125.csv");
+//        if (myfile.is_open())
+//      {
+//        while ( getline (myfile,line) )
+//        {
+//          cout << line << '\n';
+//        }
+//        myfile.close();
+//      }
+
+
+
 
     int countfalse = 0;
     int counttrue = 0;
 
     int countcellsinarches = 0;
-    VectorXd normalXvalues =VectorXd::Zero(int((1190.0/dt)*50.0));
-    VectorXd normalYvalues =VectorXd::Zero(int((1190.0/dt)*50.0));
-
-    ofstream outputNX("NormalX.csv"); //
-    ofstream outputNY("NormalY.csv"); // a
-
-    for( auto ic=0; ic < normalXvalues.rows(); ++ic ){
-        normalXvalues[ic] = normalX(gen1);
-        outputNX << normalXvalues[ic] << endl;
-        normalYvalues[ic] = normalY(gen1);
-        outputNY << normalYvalues[ic] << endl;
-    }
 
 
-        cout << "past this " << endl;
+//    VectorXd normalXvalues =VectorXd::Zero(int((1190.0/dt)*50.0));
+//    VectorXd normalYvalues =VectorXd::Zero(int((1190.0/dt)*50.0));
+//
+//    ofstream outputNX("NormalX.csv"); //
+//    ofstream outputNY("NormalY.csv"); // a
+//
+//    for( auto ic=0; ic < normalXvalues.rows(); ++ic ){
+//        normalXvalues[ic] = normalX(gen1);
+//        outputNX << normalXvalues[ic] << endl;
+//        normalYvalues[ic] = normalY(gen1);
+//        outputNY << normalYvalues[ic] << endl;
+//    }
+//
+//
+//        cout << "past this " << endl;
 
     //for each timestep
-//     while (t < final_time) {
+    //    while (t < final_time) {
     //while (furthestCell < 1000.0) {
-    //      while (countcellsinarches < 41 && t < 3000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
-       while (t < 1190.0){ // for twenty hours (1190.0) , 11hrs 610
+    //  while (countcellsinarches < 41 && t < 6000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+    //    while (t < 300.0){ // 300.0 for 5hours for twenty hours (1190.0) , 11hrs 610
+        while (t < 30.0){ // 30.0 for 30min
+
 //       while (particles.size() > 10){
 
         // Mayor comment this
@@ -618,22 +644,26 @@ double proportions(int n_seed) {
             }
 
 
+            // for the ordered sequence produce different number of random numbers, 0.00125 - 1, 0.0025 - 2, 0.005 - 4, 0.01 - 8, 0.02 - 16. In addition sqrt(1/2,4,8,..)
             //Mayor
             //random force, tryining to make the first part of this biased.
             if (get<type>(particles[j]) == 0){
 //                if (t>8000){
 //                    cout << "here even though should not be" << endl;
 //                }
-                random_vector[0] = normalXlead(gen1);
+
+                random_vector[0] = normalXlead(gen1)+  normalXlead(gen1);// +normalXlead(gen1) +  normalXlead(gen1);// + normalXlead(gen1) +  normalXlead(gen1) +normalXlead(gen1) +  normalXlead(gen1); //+normalXlead(gen1) +  normalXlead(gen1) +normalXlead(gen1) +  normalXlead(gen1) + normalXlead(gen1) +  normalXlead(gen1) +normalXlead(gen1) +  normalXlead(gen1) ;
 
             }
             else{
-                random_vector[0] = normalX(gen1);
+
+                random_vector[0] = normalX(gen1)+ normalX(gen1);// + normalX(gen1) + normalX(gen1); //+normalX(gen1) + normalX(gen1)+ normalX(gen1) + normalX(gen1); // +normalX(gen1) + normalX(gen1)+ normalX(gen1) + normalX(gen1)+normalX(gen1) + normalX(gen1)+ normalX(gen1) + normalX(gen1);
             }
 
-
+                    cout << random_vector[0] << endl;
             //random_vector[0] = normalX(gen1);
-            random_vector[1] = normalY(gen1);
+
+            random_vector[1] = normalY(gen1)+ normalY(gen1);// + normalY(gen1) + normalY(gen1); //+ normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1); // +normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1);
 
 
 //
@@ -642,7 +672,7 @@ double proportions(int n_seed) {
 
 
 
-            x = get<position>(particles[j]) + dt * (sum_forces) + sqrt(2.0 * dt * D) *
+            x = get<position>(particles[j]) + dt * (sum_forces) + sqrt(2.0 * D) *
                                                                   (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
 
 
@@ -734,7 +764,7 @@ double proportions(int n_seed) {
             if (get<position>(p)[0] > 850.0) {
                 countcellsinarches = countcellsinarches + 1;
                 get<arches>(p) = 1;
-                // get<alive>(p) = false;
+                 //get<alive>(p) = false;
             }
         }
 
@@ -851,8 +881,7 @@ double proportions(int n_seed) {
 
 
 
-        if (counter % int(60.0/dt ) == 0) { //  60/dt
-            cout << "past this " << counter << endl;
+        if (counter % int(5.0/dt ) == 0) { //  60/dt for every hour, 30.0/dt for every half an hour, 5 for every five minutes
 
 
         //    if (t <1078){
@@ -861,7 +890,7 @@ double proportions(int n_seed) {
 
            //      save at every time step
 //            #ifdef HAVE_VTK
-//                vtkWriteGrid("Cellseps200D1nseed16stuck", t, particles.get_grid(true));
+//                vtkWriteGrid("EXPLACellsXenopusRepOnlys200D10timeBIAS18hrs", t, particles.get_grid(true));
 //            #endif
 
 
@@ -877,7 +906,7 @@ double proportions(int n_seed) {
 //            cout << get<position>(particles[40]) << endl;
 
                 // centre of mass
-
+//
             double centre_of_mass =0 ;
             vdouble2 cellpos;
 
@@ -892,8 +921,8 @@ double proportions(int n_seed) {
             centre_of_mass = centre_of_mass/particles.size();
             MassCentreVector[imass] = centre_of_mass;
             imass = imass+1;
-//            cout << centre_of_mass << endl;
-
+            //cout << centre_of_mass << endl;
+        // end centre of mass
 
 
             // for the one to see how long it takes till they reach the end
@@ -946,15 +975,13 @@ double proportions(int n_seed) {
 //    cout << centre_of_mass << endl;
 
 
-//cout << MassCentreVector << endl;
-cout << "here "<< endl;
-cout << "X" << normalXvalues << endl;
+cout << MassCentreVector << endl;
 
-cout << "Y" << normalYvalues << endl;
 
 
   // cout << n_seed << endl;
-  //cout << t << endl;
+  //
+  // cout << t << endl;
 
 //    // calculate pairwise distances at the end of simulations
 ////
@@ -1084,7 +1111,7 @@ cout << "Y" << normalYvalues << endl;
 
 
     //return proportions;
-     //   return t;
+  //  return t;
 }
 
 
@@ -1093,7 +1120,8 @@ cout << "Y" << normalYvalues << endl;
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
+    const int sim_num = 2;
+    double eps = 200.0;
 
    //double vector_check_length = proportions(16); //just to know what the length is
    // cout << "ignore above" << endl;
@@ -1104,16 +1132,16 @@ int main() {
     //MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
 
 ////looping through D
-//    double D;
+    double D = 5.0;
 //    for (int i=1; i < 6; i++){
 //        if (i==1){
 //            D=1.0;
 //        }else{
 //            D=double((i-1)*3);
 //        }
-//        cout << "D = " << D << endl;
+//       cout << "D = " << D << endl;
 //// looping through beta
-//    double beta;
+    double beta = 0.0; // before was 0.2
 //    for (int i=1; i < 6; i++){
 //        beta = 0.01 * double(i);
 //        cout << "beta = " << beta << endl;
@@ -1123,8 +1151,8 @@ int main() {
         ////     parallel programming
 
        // VectorXd output = VectorXd::Zero(sim_num);
-        double output;
-       #pragma omp parallel for
+       double output;
+      #pragma omp parallel for
         for (int n = 0; n < sim_num; n++) {
 
 
@@ -1132,7 +1160,7 @@ int main() {
             //MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
 
             //cout << " n = " << n << endl;
-            output = proportions( n);
+            output = proportions( n+1000, D, eps, beta);
 
 //        // This is what I am using for MATLAB
 //        ofstream output2("sepdataChickD10eps10CoACiLGROWINGDOMAIN" + to_string(n) + ".csv");
