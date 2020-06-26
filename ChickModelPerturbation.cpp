@@ -26,7 +26,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //double proportions(int n_seed, double beta) {
 
     bool domain_growth = true; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = false;
+    bool CiLonly = true;
 
     int length_x;
     if (domain_growth == false) {
@@ -40,14 +40,14 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
     double Lt_old = length_x;
     int real_length_y = 120;
     const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
-    int insert_time =24000;// time when new cells are inserted from donor to host, times 1/dt the hours because it checks with counter
     double t = 0.0; // initialise time
-    double dt = 0.01; // time step
+    double dt = 0.005; // time step
+    int insert_time =600 *int( 1/dt);// time when new cells are inserted from donor to host, times 1/dt the hours because it checks with counter, 240 *int( 1/dt); for front-to-back and back-to-front experiments. 600 *int( 1/dt) for Removal of cells at 200-300 \mu m
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = 0.007;//beta*sqrt(dt);;//beta;//0.02 // mean movement in x velocity for leaders
+    double meanL = beta*sqrt(dt);//0.007;//beta;//0.02 // mean movement in x velocity for leaders
     double mean = beta*sqrt(dt);//beta; //0.02; // mean for all other cells
     double cell_radius = 7.5;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
@@ -90,7 +90,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //    vdouble2 cell5pos = vdouble2(172.781- 217.706 - cell_radius,7.5);
 
 
-//    // leaders and followers, leaders attract, followers do nothing
+//    // leaders and followers, ahead attract, behind do nothing
 //    vdouble2 cell1pos = vdouble2(147.727-147.727-cell_radius,72.9717);
 //    vdouble2 cell2pos = vdouble2(128.703-147.727-cell_radius,76.2494);
 //    vdouble2 cell3pos = vdouble2(111.338-147.727-cell_radius,67.3626);
@@ -108,7 +108,31 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
     /*
      * BACK TO FRONT
     */
+    // positions of inserted cells furthest position + 50
+    // ahead attract, behind repel
+//    vdouble2 cell1pos = vdouble2(14.0318,40.0887);
+//    vdouble2 cell2pos = vdouble2(11.2875,11.375);
+//    vdouble2 cell3pos = vdouble2(9.51958,68.74);
+//    vdouble2 cell4pos = vdouble2(7.6427,29.1878);
+//    vdouble2 cell5pos = vdouble2( 7.69368,52.114);
 
+
+//    // leaders and followers, ahead attract, behind do nothing, PositionsLead
+    vdouble2 cell1pos = vdouble2(7.5,73.4823); // adding 120, so that it would similar to the ahead attract, behind repel, could think more where they should be placed
+    vdouble2 cell2pos = vdouble2(7.60203,7.5);
+    vdouble2 cell3pos = vdouble2(7.5,29.0781);
+    vdouble2 cell4pos = vdouble2(7.50454,97.8988);
+    vdouble2 cell5pos = vdouble2(7.5 ,83.2659);
+
+
+    //////    //Repulsion only, we choose from PositionsReponlyeps19D12at4h.csv at Perturbations data positions with x less than 11, max at 275.645 +100
+//    vdouble2 cell1pos = vdouble2(10.314,58.9851);
+//    vdouble2 cell2pos = vdouble2(9.44441,30.9005);
+//    vdouble2 cell3pos = vdouble2(10.0516,7.63077);
+//    vdouble2 cell4pos = vdouble2(17.4627,76.3048);
+//    vdouble2 cell5pos = vdouble2(7.5,90.7541);
+
+    // old version
     // positions of inserted cells furthest position + 50
     // ahead attract, behind repel
 //    vdouble2 cell1pos = vdouble2(14.0318+ 217.706+ 50,40.0887);
@@ -117,17 +141,15 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //    vdouble2 cell4pos = vdouble2(7.6427+ 217.706+ 50,29.1878);
 //    vdouble2 cell5pos = vdouble2( 7.69368+ 217.706+ 50,52.114);
 
-    // leaders and followers, leaders attract, followers do nothing, PositionsLead
-    vdouble2 cell1pos = vdouble2(7.5 + 147.727 +50,73.4823);
-    vdouble2 cell2pos = vdouble2(7.60203+ 147.727 +50,7.5);
-    vdouble2 cell3pos = vdouble2(7.5 + 147.727 +50,29.0781);
-    vdouble2 cell4pos = vdouble2(7.50454 + 147.727 +50,97.8988);
-    vdouble2 cell5pos = vdouble2(7.5 + 147.727 +50,83.2659);
-//
+//    // leaders and followers, ahead attract, behind do nothing, PositionsLead
+//    vdouble2 cell1pos = vdouble2(7.5 + 147.727 +120,73.4823); // adding 120, so that it would similar to the ahead attract, behind repel, could think more where they should be placed
+//    vdouble2 cell2pos = vdouble2(7.60203+ 147.727 +120,7.5);
+//    vdouble2 cell3pos = vdouble2(7.5 + 147.727 +120,29.0781);
+//    vdouble2 cell4pos = vdouble2(7.50454 + 147.727 +120,97.8988);
+//    vdouble2 cell5pos = vdouble2(7.5 + 147.727 +120,83.2659);
 
 
-
-////    //Repulsion only, we choose from PositionsReponlyeps19D12at4h.csv at Perturbations data positions with x less than 11, max at 275.645 +100
+//////    //Repulsion only, we choose from PositionsReponlyeps19D12at4h.csv at Perturbations data positions with x less than 11, max at 275.645 +100
 //    vdouble2 cell1pos = vdouble2(10.314 + 298.219,58.9851);
 //    vdouble2 cell2pos = vdouble2(9.44441+ 298.219,30.9005);
 //    vdouble2 cell3pos = vdouble2(10.0516+ 298.219,7.63077);
@@ -177,67 +199,67 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
         Gamma_old(i) = Gamma(i);
     }
 
-////// when I need to save some data of the matrix
-//    MatrixXd chemo_3col(length_x * length_y, 4), chemo_3col_ind(length_x * length_y,
-//                                                                2); // need for because that is how paraview accepts data, third dimension is just zeros
-//    MatrixXd chemo = MatrixXd::Zero(length_x, length_y);
-//
-//    for (int i = 0; i < length_x; i++) {
-//        for (int j = 0; j < length_y; j++) {
-//            chemo(i, j) = 1;//cos(
-//            // M_PI * i / space_grid_controller);//1;//C0 - 0.5 * cos( M_PI * i/space_grid_controller * n);
-//        }
-//    }
-//
-//
-//    // x, y coord, 1st and 2nd columns respectively
-//    int k = 0;
-//    // it has to be 3D for paraview
-//    while (k < length_x * length_y) {
-//        for (int i = 0; i < length_x; i++) {
-//            for (int j = 0; j < length_y; j++) {
-//                chemo_3col_ind(k, 0) = i;
-//                chemo_3col_ind(k, 1) = j;
-//                chemo_3col(k, 2) = 0;
-//                k += 1;
-//            }
-//        }
-//    }
-//
-//    // save the x coordinates, scaling only based on the grid
-//    for (int i = 0; i < length_x * length_y; i++) {
-////        chemo_3col(i, 0) = Gamma_initial * chemo_3col_ind(i, 0) / double(space_grid_controller);
-//        chemo_3col(i, 0) = chemo_3col_ind(i, 0);// / double(space_grid_controller);
-//
-//    }
-//
-//
-//
-//    // u column
-//    for (int i = 0; i < length_x * length_y; i++) {
-//        chemo_3col(i, 3) = chemo(chemo_3col_ind(i, 0), chemo_3col_ind(i, 1));
-//    }
-//
-//
-//    // y coordinates, 1D so nothing changes
-//    for (int i = 0; i < length_x * length_y; i++) {
-//        // chemo_3col(i, 1) = y_init * chemo_3col_ind(i, 1) / double(space_grid_controller);
-//        chemo_3col(i, 1) = chemo_3col_ind(i, 1);// / double(space_grid_controller);
-//    }
-//
-//
-//    // to save the matrix
-//            int counting_first = 0;
-//            int counting_final = 0;
-//
-//            for (int a = 0; a < length_x; a++) {
-//                counting_first = length_y * a;
-//                counting_final = counting_first + length_y;
-//                for (int k = counting_first; k < counting_final; k++) {
-//                    chemo_3col(k, 0) = Gamma(a);
-//                }
-//            }
 //// when I need to save some data of the matrix
+    MatrixXd chemo_3col(length_x * length_y, 4), chemo_3col_ind(length_x * length_y,
+                                                                2); // need for because that is how paraview accepts data, third dimension is just zeros
+    MatrixXd chemo = MatrixXd::Zero(length_x, length_y);
+
+    for (int i = 0; i < length_x; i++) {
+        for (int j = 0; j < length_y; j++) {
+            chemo(i, j) = 1;//cos(
+            // M_PI * i / space_grid_controller);//1;//C0 - 0.5 * cos( M_PI * i/space_grid_controller * n);
+        }
+    }
+
+
+    // x, y coord, 1st and 2nd columns respectively
+    int k = 0;
+    // it has to be 3D for paraview
+    while (k < length_x * length_y) {
+        for (int i = 0; i < length_x; i++) {
+            for (int j = 0; j < length_y; j++) {
+                chemo_3col_ind(k, 0) = i;
+                chemo_3col_ind(k, 1) = j;
+                chemo_3col(k, 2) = 0;
+                k += 1;
+            }
+        }
+    }
+
+    // save the x coordinates, scaling only based on the grid
+    for (int i = 0; i < length_x * length_y; i++) {
+//        chemo_3col(i, 0) = Gamma_initial * chemo_3col_ind(i, 0) / double(space_grid_controller);
+        chemo_3col(i, 0) = chemo_3col_ind(i, 0);// / double(space_grid_controller);
+
+    }
+
+
+
+    // u column
+    for (int i = 0; i < length_x * length_y; i++) {
+        chemo_3col(i, 3) = chemo(chemo_3col_ind(i, 0), chemo_3col_ind(i, 1));
+    }
+
+
+    // y coordinates, 1D so nothing changes
+    for (int i = 0; i < length_x * length_y; i++) {
+        // chemo_3col(i, 1) = y_init * chemo_3col_ind(i, 1) / double(space_grid_controller);
+        chemo_3col(i, 1) = chemo_3col_ind(i, 1);// / double(space_grid_controller);
+    }
+
+
+    // to save the matrix
+            int counting_first = 0;
+            int counting_final = 0;
+
+            for (int a = 0; a < length_x; a++) {
+                counting_first = length_y * a;
+                counting_final = counting_first + length_y;
+                for (int k = counting_first; k < counting_final; k++) {
+                    chemo_3col(k, 0) = Gamma(a);
+                }
+            }
+// when I need to save some data of the matrix
 
 
     // initialise the number of particles
@@ -335,7 +357,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
     particles.init_neighbour_search(vdouble2(-110, -200),  vdouble2(4 *length_x, 1.5*length_y), vbool2(false, false));
 
 
-    //vtkWriteGrid("TOSAVESmallerCells", t, particles.get_grid(true));
+    //vtkWriteGrid("InitialCells", t, particles.get_grid(true));
 
     // initialise random number generator to obtain random number between 0 and 2*pi
     std::default_random_engine gen1;
@@ -368,8 +390,9 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
         // Mayor comment this
         //      insert new cells
+        // BACK TO FRONT
         //if (particles.size() < 50) {
-        if (counter < insert_time) { // this is for the perturbation experiments
+        //if (counter < insert_time) { // this is for the perturbation experiments, FRONT TO BACK because the influx is ceased once new cells are inserted
 //              if (counter % 800 == 0){
             //if (counter % 50 == 0){
             bool free_position = true;
@@ -400,73 +423,96 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
             particles.update_positions();
-        }
+        //}
         // end of insert new cells
         t = t + dt;
 
         counter = counter + 1;
 
+
+
         // insert some cells at the neural tube, just before the domain
         // very inefficient
-        if (counter == insert_time){//48000){
-
-
-            particle_type::value_type f;
-
-            get<position>(f) = cell1pos; // x=2, uniformly in y
-
-            // all the cells are of the same type
-            get<type>(f) = 1; // leaders, Mayor, comment
-
-            particles.push_back(f);
-
-            particle_type::value_type f1;
-
-            get<position>(f1) = cell2pos; // x=2, uniformly in y
-
-            // all the cells are of the same type
-            get<type>(f1) = 1; // leaders, Mayor, comment
-
-            particles.push_back(f1);
-
-            particle_type::value_type f2;
-
-            get<position>(f2) = cell3pos; // x=2, uniformly in y
-
-            // all the cells are of the same type
-            get<type>(f2) = 1; // leaders, Mayor, comment
-
-            particles.push_back(f2);
-
-            particle_type::value_type f3;
-
-            get<position>(f3) = cell4pos; // x=2, uniformly in y
-
-            // all the cells are of the same type
-            get<type>(f3) = 1; // leaders, Mayor, comment
-
-            particles.push_back(f3);
-
-            particle_type::value_type f4;
-
-            get<position>(f4) = cell5pos; // x=2, uniformly in y
-
-            // all the cells are of the same type
-            get<type>(f4) = 1; // leaders, Mayor, comment
-
-            particles.push_back(f4);
-
-
-            particles.update_positions();
-
-//            for (auto p : particles) {
-//                cout << get<position>(p) << endl;
+//        if (counter == insert_time){//48000){
+//            // BACK TO FRONT uncomment, positions based on domain length and the position of the most forward cell
+//            vector<double> vec {0,0,0,0,0};
+//            for (int i = 0; i<N; i++){
+//                vec[0]=  get<position>(particles[i])[0] ;
 //            }
+//            double max = *max_element(vec.begin(), vec.end());
+//
+//
+//            cell1pos[0] = cell1pos[0] + (Gamma(length_x - 1)+ max)/2; // half way between furthest cell and domain length plus the position of those cells
+//            cell2pos[0] = cell2pos[0] + (Gamma(length_x - 1)+ max)/2;
+//            cell3pos[0] = cell3pos[0] + (Gamma(length_x - 1)+ max)/2;
+//            cell4pos[0] = cell4pos[0] + (Gamma(length_x - 1)+ max)/2;
+//            cell5pos[0] = cell5pos[0] + (Gamma(length_x - 1)+ max)/2;
+//
+//
+//            particle_type::value_type f;
+//
+//            get<position>(f) = cell1pos; // x=2, uniformly in y
+//
+//            // all the cells are of the same type
+//            get<type>(f) = 1; // leaders, Mayor, comment
+//
+//            particles.push_back(f);
+//
+//            particle_type::value_type f1;
+//
+//            get<position>(f1) = cell2pos; // x=2, uniformly in y
+//
+//            // all the cells are of the same type
+//            get<type>(f1) = 1; // leaders, Mayor, comment
+//
+//            particles.push_back(f1);
+//
+//            particle_type::value_type f2;
+//
+//            get<position>(f2) = cell3pos; // x=2, uniformly in y
+//
+//            // all the cells are of the same type
+//            get<type>(f2) = 1; // leaders, Mayor, comment
+//
+//            particles.push_back(f2);
+//
+//            particle_type::value_type f3;
+//
+//            get<position>(f3) = cell4pos; // x=2, uniformly in y
+//
+//            // all the cells are of the same type
+//            get<type>(f3) = 1; // leaders, Mayor, comment
+//
+//            particles.push_back(f3);
+//
+//            particle_type::value_type f4;
+//
+//            get<position>(f4) = cell5pos; // x=2, uniformly in y
+//
+//            // all the cells are of the same type
+//            get<type>(f4) = 1; // leaders, Mayor, comment
+//
+//            particles.push_back(f4);
+//
+//
+//            particles.update_positions();
+//
+////            for (auto p : particles) {
+////                cout << get<position>(p) << endl;
+////            }
+//
+//        }
+//
 
+
+        // REMOVAL OF CELLS IN THE MIDDLE OF THE STREAM, AT 10H, REMOVE FROM 200-300\MU M
+        if (counter == insert_time) {//48000){
+            for (auto p : particles) {
+                if (get<position>(p)[0] > 200.0 && get<position>(p)[0] < 300.0) {
+                    get<alive>(p) = false;
+                }
+            }
         }
-
-
-
 
 
 
@@ -658,32 +704,32 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //
 //                    }
 
-// based on position if ahead, larger force than if behind, leaders and followers
+//// based on position if ahead, larger force than if behind, leaders and followers
 
-                    npow = 4.0; // Lennard-Jones type model powers, attractive
-                    mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
-                    eps_ij = 0.0;//19.0; // 0 if no force
-
-                    temppos = get<position>(*k);
-
-
-                    if(temppos[0] >x[0] ){
-                        npow = 2.0; // Lennard-Jones type model powers, attractive
-                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
-                        eps_ij =256.0;
-                        // attraction an repulsion, sometimes comment
-                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
-                                                pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
-
-                    }
-                    else{
-                        npow = 4.0; // Lennard-Jones type model powers, attractive
-                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
-                        eps_ij = 0.0;//19.0;
-                        // repulsion only, if the cells only repel the cells ahead
-                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
-
-                    }
+//                    npow = 4.0; // Lennard-Jones type model powers, attractive
+//                    mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                    eps_ij = 0.0;//19.0; // 0 if no force
+//
+//                    temppos = get<position>(*k);
+//
+//
+//                    if(temppos[0] >x[0] ){
+//                        npow = 2.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij =256.0;
+//                        // attraction an repulsion, sometimes comment
+//                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
+//                                                pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
+//
+//                    }
+//                    else{
+//                        npow = 4.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij = 0.0;//19.0;
+//                        // repulsion only, if the cells only repel the cells ahead
+//                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
+//
+//                    }
 
 
 //                     // if gradually decreasing force
@@ -711,13 +757,13 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //                        eps_ij = 51.0;
 //                    }
 
-//                     if (CiLonly == true) {
-//                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
-//                     } else {
-//                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
-//                                                 pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
-//
-//                     }
+                     if (CiLonly == true) {
+                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
+                     } else {
+                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
+                                                 pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
+
+                     }
 
 
                     force_ij = f0 * dzdr * change / distance;
@@ -764,8 +810,8 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //                cout << "random " << sqrt(2.0 * dt * D)* (random_vector) << endl;
 //
 //            }
-
-            // boundary forces before the position is updated
+//
+//             boundary forces before the position is updated
 
             if (x[0] < cell_radius) {
                 bound_sum_forces += (cell_radius- x[0]) / x[0] * vdouble2(x[0], 0);
@@ -785,8 +831,8 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
             x = x + (bound_sum_forces); // boundary force
 
-            // FORCES change for Front to BACK experiments
-            // allow till -100
+//           //  FORCES change for Front to BACK experiments
+//           //  allow till -100
 //            if (counter < insert_time){ // this is before the insertion, domain as usual
 //                if (x[0] < cell_radius) {
 //                    bound_sum_forces += (cell_radius- x[0]) / x[0] * vdouble2(x[0], 0);
@@ -967,7 +1013,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
         }
 
 
-
+// end of phenotype switching
 
 
 
@@ -1099,10 +1145,10 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
         //            //     save at every time step
         #ifdef HAVE_VTK
 
-            // vtkWriteGrid("CellsBehindRepAheadAttreps1p5D5FromBackToFront", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
-                       // vtkWriteGrid("CellsRepOnlyeps19D12FromBackToFront", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
-                     vtkWriteGrid("CellsLeaderseps256Foll0D5FromBackToFront", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
-
+            // vtkWriteGrid("CellsBehindRepAheadAttreps1p5D5dt0p005MidRemoval", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
+                       vtkWriteGrid("CellsRepOnlyeps19D12dt0p005MidRemoval", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
+             //    vtkWriteGrid("CellsLeaderseps256Foll0D5dt0p005MidRemoval", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
+                //     vtkWriteGrid("DT0p005Leadersbiasedanddisappearcheck", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
         #endif
         //}
 
@@ -1363,7 +1409,7 @@ int main() {
 
 
 //looping through D
-    double D = 5.0;
+    double D = 12.0;
 //        for (int i=1; i < 7; i++) {
 //            if (i == 1) {
 //                D = 1.0;
