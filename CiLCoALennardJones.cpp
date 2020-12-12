@@ -33,7 +33,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
     int length_x;
     if (domain_growth == false) {
-        length_x = 1500;//1500; // normally 1100, Mayor, with arches 1500
+        length_x = 2000;//1500; // normally 1100, Mayor, with arches 1500
 
     } else {
         length_x = 300;// length in x velocity of the chemoattractant matrix
@@ -42,9 +42,11 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     int length_y = 218; // Mayor 218, ours 120;// from 218 to 130 reduction NarrowDomain 130
     double Lt_old = length_x;
     int real_length_y = 120;
-    const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
+    const double t_final  = 3000.0;// 3000.0 corresponds to 50h, 6000.0 corresponds to 100h
+    const double final_time = 1080; // for growing domain 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
+
     double t = 0.0; // initialise time
-    double dt = 0.00125;//00625; // time step
+    double dt = 0.01;//00625; // time step 0.01 min
 
     double dt_min = 0.00125;//00625; // time step
     int times = int(dt/dt_min);
@@ -52,8 +54,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = beta*sqrt(dt);//2;//2;//0.001;//1;//1;//0.01;//2;//0.05;//0.04; // mean movement in x velocity
-    double mean = beta*sqrt(dt);//2;//2;//0.02;//2;//0.001;//1;//
+    double meanL = 0;// // mean movement in x velocity
+    double mean = 0;//
     double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
@@ -101,6 +103,11 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 // will use stored value of the position of a particle
     typedef particle_type::position position;
+
+
+    // BIASED
+
+    int bias = 2; // 0 if no bias, 1 if biased leaders, 2 if all biased
 
 
 /*
@@ -186,7 +193,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
     // initialise the number of particles
-    particle_type particles(N); // Mayor 10*N, ours N
+    particle_type particles(10*N); // Mayor 10*N, ours N
 
     // initialise random number generator for particles entering the domain, appearing at the start in x and uniformly in y
     std::default_random_engine gen;
@@ -203,7 +210,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 * compact initialisation of particles
 */
 
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < N; ++i) { //Note that here normally is N, not 1
 
 
         get<radius>(particles[i]) = cell_radius;
@@ -216,57 +223,57 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
             get<type>(particles[i]) = 0; // leaders, Mayor, comment
 
-//////// Mayor below this
-//            get<position>(particles[i+5]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                0.5 * double(length_y - 1) /
-//                                                                double(N)); // x=radius, uniformly in y
-//
-//
-//            get<position>(particles[i+10]) = vdouble2(5*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                0.5 * double(length_y - 1) /
-//                                                                double(N)); // x=radius, uniformly in y
-//
-//
-//            get<position>(particles[i+15]) = vdouble2(7*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                            0.5 * double(length_y - 1) /
-//                                                            double(N)); // x=radius, uniformly in y
-//
-//            get<position>(particles[i+20]) = vdouble2(9*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                 0.5 * double(length_y - 1) /
-//                                                                 double(N)); // x=radius, uniformly in y
-//            get<position>(particles[i+25]) = vdouble2(11*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                     0.5 * double(length_y - 1) /
-//                                                                     double(N)); // x=radius, uniformly in y
-//            get<position>(particles[i+30]) = vdouble2(13*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                     0.5 * double(length_y - 1) /
-//                                                                     double(N)); // x=radius, uniformly in y
-//            get<position>(particles[i+35]) = vdouble2(15*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                     0.5 * double(length_y - 1) /
-//                                                                     double(N)); // x=radius, uniformly in y
-//            get<position>(particles[i+40]) = vdouble2(17*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                     0.5 * double(length_y - 1) /
-//                                                                     double(N)); // x=radius, uniformly in y
-//            get<position>(particles[i+45]) = vdouble2(19*positions, (i + 1) * double(length_y - 1) / double(N) -
-//                                                                     0.5 * double(length_y - 1) /
-//                                                                     double(N)); // x=radius, uniformly in y
-//
+////// Mayor below this
+            get<position>(particles[i+5]) = vdouble2(3*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                0.5 * double(length_y - 1) /
+                                                                double(N)); // x=radius, uniformly in y
+
+
+            get<position>(particles[i+10]) = vdouble2(5*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                0.5 * double(length_y - 1) /
+                                                                double(N)); // x=radius, uniformly in y
+
+
+            get<position>(particles[i+15]) = vdouble2(7*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                            0.5 * double(length_y - 1) /
+                                                            double(N)); // x=radius, uniformly in y
+
+            get<position>(particles[i+20]) = vdouble2(9*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                 0.5 * double(length_y - 1) /
+                                                                 double(N)); // x=radius, uniformly in y
+            get<position>(particles[i+25]) = vdouble2(11*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                     0.5 * double(length_y - 1) /
+                                                                     double(N)); // x=radius, uniformly in y
+            get<position>(particles[i+30]) = vdouble2(13*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                     0.5 * double(length_y - 1) /
+                                                                     double(N)); // x=radius, uniformly in y
+            get<position>(particles[i+35]) = vdouble2(15*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                     0.5 * double(length_y - 1) /
+                                                                     double(N)); // x=radius, uniformly in y
+            get<position>(particles[i+40]) = vdouble2(17*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                     0.5 * double(length_y - 1) /
+                                                                     double(N)); // x=radius, uniformly in y
+            get<position>(particles[i+45]) = vdouble2(19*positions, (i + 1) * double(length_y - 1) / double(N) -
+                                                                     0.5 * double(length_y - 1) /
+                                                                     double(N)); // x=radius, uniformly in y
+
 
 
 // for convergence test, inside the boundary
 
-
+//
 //            get<position>(particles[0]) = vdouble2(5*positions, (3 + 1) * double(length_y - 1) / double(N) -
 //                                                                0.5 * double(length_y - 1) /
 //                                                                double(N)); // x=radius, uniformly in
 //
 //            //get<type>(particles[i]) = 0; // leaders, Mayor, comment
-//
-////////// Mayor below this
-//            get<position>(particles[1]) = vdouble2(7*positions, (3 + 1) * double(length_y - 1) / double(N) -
+
+//////// Mayor below this
+//            get<position>(particles[i]) = vdouble2(7*positions, (3 + 1) * double(length_y - 1) / double(N) -
 //                                                                0.5 * double(length_y - 1) /
 //                                                                double(N)); // x=radius, uniformly in y
-//
-//
+
+
 //            get<position>(particles[2]) = vdouble2(9*positions, (3 + 1) * double(length_y - 1) / double(N) -
 //                                                                0.5 * double(length_y - 1) /
 //                                                                double(N)); // x=radius, uniformly in y
@@ -421,7 +428,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     particles.init_neighbour_search(vdouble2(-20, -20), 5 * vdouble2(length_x, length_y), vbool2(false, false));
 
 
-    //vtkWriteGrid("InitialCellsBndry", t, particles.get_grid(true));
+    //vtkWriteGrid("InitialCellsXenopus", t, particles.get_grid(true));
 
     // initialise random number generator to obtain random number between 0 and 2*pi
     std::default_random_engine gen1;
@@ -432,43 +439,43 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     //std::normal_distribution<double> normal(M_PI/2,sigma); // normal distribution for filopodia
 
     // for Lennard-Jones
-    std::normal_distribution<double> normalXlead(meanL,sqrt(dt_min*1.0)); // mean specified variance 1 , actually it is standar deviation!!!!!!!!!!!
-    std::normal_distribution<double> normalX(mean,sqrt(dt_min*1.0)); // mean 0 variance 1
-    std::normal_distribution<double> normalY(0.0,sqrt(dt_min*1.0)); // mean 0 variance 1
-//    std::normal_distribution<double> normalXlead(meanL,1.0); // mean specified variance 1
-//    std::normal_distribution<double> normalX(mean,1.0); // mean 0 variance 1
-//    std::normal_distribution<double> normalY(0.0,1.0); // mean 0 variance 1
+//    std::normal_distribution<double> normalXlead(meanL,sqrt(dt_min*1.0)); // mean specified variance 1 , actually it is standar deviation!!!!!!!!!!!
+//    std::normal_distribution<double> normalX(mean,sqrt(dt_min*1.0)); // mean 0 variance 1
+//    std::normal_distribution<double> normalY(0.0,sqrt(dt_min*1.0)); // mean 0 variance 1
+    std::normal_distribution<double> normalXlead(meanL,1.0); // mean specified variance 1
+    std::normal_distribution<double> normalX(mean,1.0); // mean 0 variance 1
+    std::normal_distribution<double> normalY(0.0,1.0); // mean 0 variance 1
 
 //initialise a random vector for each cell, entries of N(0,dtmin)
-
-int numberofrand = int(32.0/dt_min) +1; // 32 minutes, so that 32/0.00125 divides 16
-
-VectorXd vectorX1 = VectorXd::Zero(numberofrand);
-VectorXd vectorX2 = VectorXd::Zero(numberofrand);
-VectorXd vectorX3 = VectorXd::Zero(numberofrand);
-VectorXd vectorX4 = VectorXd::Zero(numberofrand);
-VectorXd vectorX5 = VectorXd::Zero(numberofrand);
-
-
-VectorXd vectorY1= VectorXd::Zero(numberofrand);
-VectorXd vectorY2= VectorXd::Zero(numberofrand);
-VectorXd vectorY3= VectorXd::Zero(numberofrand);
-VectorXd vectorY4= VectorXd::Zero(numberofrand);
-VectorXd vectorY5= VectorXd::Zero(numberofrand);
-
-
-for (int i = 0; i < numberofrand; i++){
-    vectorX1[i] = normalX(gen1);
-    vectorX2[i] = normalX(gen1);
-    vectorX3[i] = normalX(gen1);
-    vectorX4[i] = normalX(gen1);
-    vectorX5[i] = normalX(gen1);
-    vectorY1[i] = normalY(gen1);
-    vectorY2[i] = normalY(gen1);
-    vectorY3[i] = normalY(gen1);
-    vectorY4[i] = normalY(gen1);
-    vectorY5[i] = normalY(gen1);
-}
+//
+//int numberofrand = int(32.0/dt_min) +1; // 32 minutes, so that 32/0.00125 divides 16
+//
+//VectorXd vectorX1 = VectorXd::Zero(numberofrand);
+//VectorXd vectorX2 = VectorXd::Zero(numberofrand);
+//VectorXd vectorX3 = VectorXd::Zero(numberofrand);
+//VectorXd vectorX4 = VectorXd::Zero(numberofrand);
+//VectorXd vectorX5 = VectorXd::Zero(numberofrand);
+//
+//
+//VectorXd vectorY1= VectorXd::Zero(numberofrand);
+//VectorXd vectorY2= VectorXd::Zero(numberofrand);
+//VectorXd vectorY3= VectorXd::Zero(numberofrand);
+//VectorXd vectorY4= VectorXd::Zero(numberofrand);
+//VectorXd vectorY5= VectorXd::Zero(numberofrand);
+//
+//
+//for (int i = 0; i < numberofrand; i++){
+//    vectorX1[i] = normalX(gen1);
+//    vectorX2[i] = normalX(gen1);
+//    vectorX3[i] = normalX(gen1);
+//    vectorX4[i] = normalX(gen1);
+//    vectorX5[i] = normalX(gen1);
+//    vectorY1[i] = normalY(gen1);
+//    vectorY2[i] = normalY(gen1);
+//    vectorY3[i] = normalY(gen1);
+//    vectorY4[i] = normalY(gen1);
+//    vectorY5[i] = normalY(gen1);
+//}
 
     int countfalse = 0;
     int counttrue = 0;
@@ -479,46 +486,46 @@ for (int i = 0; i < numberofrand; i++){
     //for each timestep
     //    while (t < final_time) {
     //while (furthestCell < 1000.0) {
-    //  while (countcellsinarches < 41 && t < 6000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
+      while (countcellsinarches < 41 && t < t_final ){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
     //    while (t < 300.0){ // 300.0 for 5hours for twenty hours (1190.0) , 11hrs 610
-       while (t < 30.0){ // 30.0 for 30min
+    //   while (t < 30.0){ // 30.0 for 30min
 
 //       while (particles.size() > 10){
 
         // Mayor comment this
-//        //      insert new cells
-//        //if (particles.size()<25) {
-//        //if (counter % 100 == 0){
-//        bool free_position = true;
-//        particle_type::value_type f;
-//
-//        get<position>(f) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
-//
-//        /*
-//         * loop over all neighbouring leaders within "dem_diameter" distance
-//         */
-//        for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), diameter); tpl != false; ++tpl) {
-//
-//            vdouble2 diffx = tpl.dx();
-//
-//            if (diffx.norm() < diameter) {
-//                free_position = false;
-//                break;
-//            }
-//        }
-//
-//        // all the cells are of the same type
-//        get<type>(f) = 1; // leaders, Mayor, comment
-//
-//        if (free_position) {
-//
-//            particles.push_back(f);
-//        }
-//
-//
-//        particles.update_positions();
-//        //}
-//        // end of insert new cells
+        //      insert new cells
+        if (particles.size()<50) {
+        //if (counter % 100 == 0){
+        bool free_position = true;
+        particle_type::value_type f;
+
+        get<position>(f) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
+
+        /*
+         * loop over all neighbouring leaders within "dem_diameter" distance
+         */
+        for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), diameter); tpl != false; ++tpl) {
+
+            vdouble2 diffx = tpl.dx();
+
+            if (diffx.norm() < diameter) {
+                free_position = false;
+                break;
+            }
+        }
+
+        // all the cells are of the same type
+        get<type>(f) = 1; // leaders, Mayor, comment
+
+        if (free_position) {
+
+            particles.push_back(f);
+        }
+
+
+        particles.update_positions();
+        }
+        // end of insert new cells
         t = t + dt;
 
         counter = counter + 1;
@@ -631,7 +638,7 @@ for (int i = 0; i < numberofrand; i++){
         // position update
         for (int j = 0; j < particles.size(); j++) {
             vdouble2 x; // use variable x for the position of cells
-//
+            vdouble2 temppos; // temporary position of a neighbouring cell
 
 
             // old version from here
@@ -660,20 +667,48 @@ for (int i = 0; i < numberofrand; i++){
 //                    else{
 //                        eps_ij =1;
 //                    }
+
+
+//                     npow = 4.0; // Lennard-Jones type model powers, attractive
+//                     mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                    eps_ij = 4;//19.0; // 0 if no force
+//
+//                    temppos = get<position>(*k);
+//
+//
+//                    if(temppos[0] >x[0] ){
+//                        npow = 4.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij =4;
+//                        // attraction an repulsion, sometimes comment
+//                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
+//                                                pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
+//
+//                    }
+//                    else{
+//                        npow = 4.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij = 4;//19.0;
+//                        // repulsion only, if the cells only repel the cells ahead
+//                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
+//
+//                    }
+//
+
+
+
+
+
+
+
+
+
+    // IMPORTANT TO UNCOMMENT IF USUAL FORCES
+
                     if (CiLonly == true) {
                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow)/pow(distance,mpow+1));
                     } else {
                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow)/pow(distance,mpow+1) - pow(sigma_max,npow) / pow(distance,npow+1)); //Lennard-Jones
-                        //Morse potential
-//                        if (distance < 2*diameter){
-//                            dzdr = 20* (exp(-2*a*(distance-diameter)) - exp(-a*(distance-diameter)));
-//                        }
-//                        if (distance >= 2*diameter && distance < 3*diameter){
-//                            dzdr = 20* (exp(-2*a*(distance-diameter)) - exp(-a*(distance-diameter))) * 0.5 * (1-sin((2*distance - diameter)/(2*diameter)));
-//                        }
-//                        if (distance > 3*diameter){
-//                            dzdr = 0;
-//                        }
 
                     }
 
@@ -687,7 +722,7 @@ for (int i = 0; i < numberofrand; i++){
 
             // for the ordered sequence produce different number of random numbers, 0.00125 - 1, 0.0025 - 2, 0.005 - 4, 0.01 - 8, 0.02 - 16. In addition sqrt(1/2,4,8,..)
             //Mayor
-//            //random force, tryining to make the first part of this biased.
+            //random force, tryining to make the first part of this biased.
 //            if (get<type>(particles[j]) == 0){
 ////                if (t>8000){
 ////                    cout << "here even though should not be" << endl;
@@ -701,171 +736,188 @@ for (int i = 0; i < numberofrand; i++){
 //
 //                random_vector[0] = normalX(gen1);// + normalX(gen1) + normalX(gen1);// +normalX(gen1) + normalX(gen1)+ normalX(gen1) + normalX(gen1)+normalX(gen1) + normalX(gen1)+ normalX(gen1) + normalX(gen1)+normalX(gen1) + normalX(gen1)+ normalX(gen1) + normalX(gen1);
 //            }
-//
-//
-//
-//            random_vector[1] =normalY(gen1);//+ normalY(gen1)+ normalY(gen1);//  + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1)+normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1);
+
+
+            random_vector[0] = normalX(gen1);
+            random_vector[1] =normalY(gen1);//+ normalY(gen1)+ normalY(gen1);//  + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1)+normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1) + normalY(gen1);
 
 
             //new version for convergence!!!
             
-            //for dt = 0.00125
+//            //for dt = 0.00125
+////
+//            if (get<id>(particles[j]) == 0){
+//                random_vector[0] = vectorX1[(counter-1)];
+//                random_vector[1] = vectorY1[(counter-1)];
+//            }
 //
-            if (get<id>(particles[j]) == 0){
-                random_vector[0] = vectorX1[(counter-1)];
-                random_vector[1] = vectorY1[(counter-1)];
-            }
-
-            if (get<id>(particles[j]) == 1){
-                random_vector[0] = vectorX2[(counter-1)];
-                random_vector[1] = vectorY2[(counter-1)];
-            }
-            if (get<id>(particles[j]) == 2){
-                random_vector[0] = vectorX3[(counter-1)];
-                random_vector[1] = vectorY3[(counter-1)];
-            }
-            if (get<id>(particles[j]) == 3){
-                random_vector[0] = vectorX4[(counter-1)];
-                random_vector[1] = vectorY4[(counter-1)];
-            }
-
-            if (get<id>(particles[j]) == 4){
-                random_vector[0] = vectorX5[(counter-1)];
-                random_vector[1] = vectorY5[(counter-1)];
-            }
-
-//            ////dt = 0.0025
-            if (times == 2) {
-            if (get<id>(particles[j]) == 0){
-                random_vector[0] = vectorX1[ times * (counter-1)] + vectorX1[ times *  (counter-1)+1];
-                random_vector[1] = vectorY1[ times *  (counter-1)] + vectorY1[ times *  (counter-1)+1];
-            }
-
-            if (get<id>(particles[j]) == 1){
-                random_vector[0] = vectorX2[ times * (counter-1)] + vectorX2[ times *  (counter-1)+1];
-                random_vector[1] = vectorY2[ times *  (counter-1)] + vectorY2[ times *  (counter-1)+1];
-            }
-            if (get<id>(particles[j]) == 2){
-                random_vector[0] = vectorX3[ times * (counter-1)] + vectorX3[ times *  (counter-1)+1];
-                random_vector[1] = vectorY3[ times *  (counter-1)] + vectorY3[ times *  (counter-1)+1];
-            }
-            if (get<id>(particles[j]) == 3){
-                random_vector[0] = vectorX4[ times * (counter-1)] + vectorX4[ times *  (counter-1)+1];
-                random_vector[1] = vectorY4[ times *  (counter-1)] + vectorY4[ times *  (counter-1)+1];
-            }
-
-            if (get<id>(particles[j]) == 4){
-                random_vector[0] = vectorX5[ times * (counter-1)] + vectorX5[ times *  (counter-1)+1];
-                random_vector[1] = vectorY5[ times *  (counter-1)] + vectorY5[ times *  (counter-1)+1];
-            }
-            }
-//            ////dt = 0.005
-            if (times == 4) {
-                if (get<id>(particles[j]) == 0) {
-                    random_vector[0] = vectorX1[times * (counter - 1)] + vectorX1[times * (counter - 1) + 1] +
-                                       vectorX1[times * (counter - 1) + 2] + vectorX1[times * (counter - 1) + 3];
-                    random_vector[1] = vectorY1[times * (counter - 1)] + vectorY1[times * (counter - 1) + 1] +
-                                       vectorY1[times * (counter - 1) + 2] + vectorY1[times * (counter - 1) + 3];
-                }
-
-                if (get<id>(particles[j]) == 1) {
-                    random_vector[0] = vectorX2[times * (counter - 1)] + vectorX2[times * (counter - 1) + 1] +
-                                       vectorX2[times * (counter - 1) + 2] + vectorX2[times * (counter - 1) + 3];
-                    random_vector[1] = vectorY2[times * (counter - 1)] + vectorY2[times * (counter - 1) + 1] +
-                                       vectorY2[times * (counter - 1) + 2] + vectorY2[times * (counter - 1) + 3];
-                }
-                if (get<id>(particles[j]) == 2) {
-                    random_vector[0] = vectorX3[times * (counter - 1)] + vectorX3[times * (counter - 1) + 1] +
-                                       vectorX3[times * (counter - 1) + 2] + vectorX3[times * (counter - 1) + 3];
-                    random_vector[1] = vectorY3[times * (counter - 1)] + vectorY3[times * (counter - 1) + 1] +
-                                       vectorY3[times * (counter - 1) + 2] + vectorY3[times * (counter - 1) + 3];
-                }
-                if (get<id>(particles[j]) == 3) {
-                    random_vector[0] = vectorX4[times * (counter - 1)] + vectorX4[times * (counter - 1) + 1] +
-                                       vectorX4[times * (counter - 1) + 2] + vectorX4[times * (counter - 1) + 3];
-                    random_vector[1] = vectorY4[times * (counter - 1)] + vectorY4[times * (counter - 1) + 1] +
-                                       vectorY4[times * (counter - 1) + 2] + vectorY4[times * (counter - 1) + 3];
-                }
-
-                if (get<id>(particles[j]) == 4) {
-                    random_vector[0] = vectorX5[times * (counter - 1)] + vectorX5[times * (counter - 1) + 1] +
-                                       vectorX5[times * (counter - 1) + 2] + vectorX5[times * (counter - 1) + 3];
-                    random_vector[1] = vectorY5[times * (counter - 1)] + vectorY5[times * (counter - 1) + 1] +
-                                       vectorY5[times * (counter - 1) + 2] + vectorY5[times * (counter - 1) + 3];
-                }
-            }
-//            //dt = 0.01
-            if (times == 8) {
-            if (get<id>(particles[j]) == 0){
-                random_vector[0] = vectorX1[ times * (counter-1)] + vectorX1[ times *  (counter-1)+1] + vectorX1[ times *  (counter-1)+2] + vectorX1[ times *  (counter-1)+3]+ vectorX1[ times *  (counter-1)+4]+ vectorX1[ times *  (counter-1)+5]+ vectorX1[ times *  (counter-1)+6]+ vectorX1[ times *  (counter-1)+7];
-                random_vector[1] = vectorY1[ times *  (counter-1)] + vectorY1[ times *  (counter-1)+1]+ vectorY1[ times *  (counter-1)+2] + vectorY1[ times *  (counter-1)+3] + vectorY1[ times *  (counter-1)+4]+ vectorY1[ times *  (counter-1)+5]+ vectorY1[ times *  (counter-1)+6]+ vectorY1[ times *  (counter-1)+7];
-            }
-
-            if (get<id>(particles[j]) == 1){
-                random_vector[0] = vectorX2[ times * (counter-1)] + vectorX2[ times *  (counter-1)+1] + vectorX2[ times *  (counter-1)+2] + vectorX2[ times *  (counter-1)+3]+ vectorX2[ times *  (counter-1)+4]+ vectorX2[ times *  (counter-1)+5]+ vectorX2[ times *  (counter-1)+6]+ vectorX2[ times *  (counter-1)+7];
-                random_vector[1] = vectorY2[ times *  (counter-1)] + vectorY2[ times *  (counter-1)+1]+ vectorY2[ times *  (counter-1)+2] + vectorY2[ times *  (counter-1)+3] + vectorY2[ times *  (counter-1)+4]+ vectorY2[ times *  (counter-1)+5]+ vectorY2[ times *  (counter-1)+6]+ vectorY2[ times *  (counter-1)+7];
-            }
-            if (get<id>(particles[j]) == 2){
-                random_vector[0] = vectorX3[ times * (counter-1)] + vectorX3[ times *  (counter-1)+1] + vectorX3[ times *  (counter-1)+2] + vectorX3[ times *  (counter-1)+3]+ vectorX3[ times *  (counter-1)+4]+ vectorX3[ times *  (counter-1)+5]+ vectorX3[ times *  (counter-1)+6]+ vectorX3[ times *  (counter-1)+7];
-                random_vector[1] = vectorY3[ times *  (counter-1)] + vectorY3[ times *  (counter-1)+1]+ vectorY3[ times *  (counter-1)+2] + vectorY3[ times *  (counter-1)+3] + vectorY3[ times *  (counter-1)+4]+ vectorY3[ times *  (counter-1)+5]+ vectorY3[ times *  (counter-1)+6]+ vectorY3[ times *  (counter-1)+7];
-            }
-            if (get<id>(particles[j]) == 3){
-                random_vector[0] = vectorX4[ times * (counter-1)] + vectorX4[ times *  (counter-1)+1] + vectorX4[ times *  (counter-1)+2] + vectorX4[ times *  (counter-1)+3]+ vectorX4[ times *  (counter-1)+4]+ vectorX4[ times *  (counter-1)+5]+ vectorX4[ times *  (counter-1)+6]+ vectorX4[ times *  (counter-1)+7];
-                random_vector[1] = vectorY4[ times *  (counter-1)] + vectorY4[ times *  (counter-1)+1]+ vectorY4[ times *  (counter-1)+2] + vectorY4[ times *  (counter-1)+3] + vectorY4[ times *  (counter-1)+4]+ vectorY4[ times *  (counter-1)+5]+ vectorY4[ times *  (counter-1)+6]+ vectorY4[ times *  (counter-1)+7];
-            }
-
-            if (get<id>(particles[j]) == 4){
-                random_vector[0] = vectorX5[ times * (counter-1)] + vectorX5[ times *  (counter-1)+1] + vectorX5[ times *  (counter-1)+2] + vectorX5[ times *  (counter-1)+3]+ vectorX5[ times *  (counter-1)+4]+ vectorX5[ times *  (counter-1)+5]+ vectorX5[ times *  (counter-1)+6]+ vectorX5[ times *  (counter-1)+7];
-                random_vector[1] = vectorY5[ times *  (counter-1)] + vectorY5[ times *  (counter-1)+1]+ vectorY5[ times *  (counter-1)+2] + vectorY5[ times *  (counter-1)+3] + vectorY5[ times *  (counter-1)+4]+ vectorY5[ times *  (counter-1)+5]+ vectorY5[ times *  (counter-1)+6]+ vectorY5[ times *  (counter-1)+7];
-            }
-            }
-
-            //dt = 0.02
-            if (times == 16){
-                if (get<id>(particles[j]) == 0){
-                    random_vector[0] = vectorX1[ times * (counter-1)] + vectorX1[ times *  (counter-1)+1] + vectorX1[ times *  (counter-1)+2] + vectorX1[ times *  (counter-1)+3]+ vectorX1[ times *  (counter-1)+4]+ vectorX1[ times *  (counter-1)+5]+ vectorX1[ times *  (counter-1)+6]+ vectorX1[ times *  (counter-1)+7]+
-                                       vectorX1[ times * (counter-1)+8] + vectorX1[ times *  (counter-1)+9] + vectorX1[ times *  (counter-1)+10] + vectorX1[ times *  (counter-1)+11]+ vectorX1[ times *  (counter-1)+12]+ vectorX1[ times *  (counter-1)+13]+ vectorX1[ times *  (counter-1)+14]+ vectorX1[ times *  (counter-1)+15];
-                    random_vector[1] = vectorY1[ times *  (counter-1)] + vectorY1[ times *  (counter-1)+1]+ vectorY1[ times *  (counter-1)+2] + vectorY1[ times *  (counter-1)+3] + vectorY1[ times *  (counter-1)+4]+ vectorY1[ times *  (counter-1)+5]+ vectorY1[ times *  (counter-1)+6]+ vectorY1[ times *  (counter-1)+7] +
-                                       vectorY1[ times *  (counter-1)+8] + vectorY1[ times *  (counter-1)+9]+ vectorY1[ times *  (counter-1)+10] + vectorY1[ times *  (counter-1)+11] + vectorY1[ times *  (counter-1)+12]+ vectorY1[ times *  (counter-1)+13]+ vectorY1[ times *  (counter-1)+14]+ vectorY1[ times *  (counter-1)+15];
-                }
-
-                if (get<id>(particles[j]) == 1){
-                    random_vector[0] = vectorX2[ times * (counter-1)] + vectorX2[ times *  (counter-1)+1] + vectorX2[ times *  (counter-1)+2] + vectorX2[ times *  (counter-1)+3]+ vectorX2[ times *  (counter-1)+4]+ vectorX2[ times *  (counter-1)+5]+ vectorX2[ times *  (counter-1)+6]+ vectorX2[ times *  (counter-1)+7]+
-                                       vectorX2[ times * (counter-1)+8] + vectorX2[ times *  (counter-1)+9] + vectorX2[ times *  (counter-1)+10] + vectorX2[ times *  (counter-1)+11]+ vectorX2[ times *  (counter-1)+12]+ vectorX2[ times *  (counter-1)+13]+ vectorX2[ times *  (counter-1)+14]+ vectorX2[ times *  (counter-1)+15];
-                    random_vector[1] = vectorY2[ times *  (counter-1)] + vectorY2[ times *  (counter-1)+1]+ vectorY2[ times *  (counter-1)+2] + vectorY2[ times *  (counter-1)+3] + vectorY2[ times *  (counter-1)+4]+ vectorY2[ times *  (counter-1)+5]+ vectorY2[ times *  (counter-1)+6]+ vectorY2[ times *  (counter-1)+7] +
-                                       vectorY2[ times *  (counter-1)+8] + vectorY2[ times *  (counter-1)+9]+ vectorY2[ times *  (counter-1)+10] + vectorY2[ times *  (counter-1)+11] + vectorY2[ times *  (counter-1)+12]+ vectorY2[ times *  (counter-1)+13]+ vectorY2[ times *  (counter-1)+14]+ vectorY2[ times *  (counter-1)+15];
-
-                }
-                if (get<id>(particles[j]) == 2){
-                    random_vector[0] = vectorX3[ times * (counter-1)] + vectorX3[ times *  (counter-1)+1] + vectorX3[ times *  (counter-1)+2] + vectorX3[ times *  (counter-1)+3]+ vectorX3[ times *  (counter-1)+4]+ vectorX3[ times *  (counter-1)+5]+ vectorX3[ times *  (counter-1)+6]+ vectorX3[ times *  (counter-1)+7]+
-                                       vectorX3[ times * (counter-1)+8] + vectorX3[ times *  (counter-1)+9] + vectorX3[ times *  (counter-1)+10] + vectorX3[ times *  (counter-1)+11]+ vectorX3[ times *  (counter-1)+12]+ vectorX3[ times *  (counter-1)+13]+ vectorX3[ times *  (counter-1)+14]+ vectorX3[ times *  (counter-1)+15];
-                    random_vector[1] = vectorY3[ times *  (counter-1)] + vectorY3[ times *  (counter-1)+1]+ vectorY3[ times *  (counter-1)+2] + vectorY3[ times *  (counter-1)+3] + vectorY3[ times *  (counter-1)+4]+ vectorY3[ times *  (counter-1)+5]+ vectorY3[ times *  (counter-1)+6]+ vectorY3[ times *  (counter-1)+7] +
-                                       vectorY3[ times *  (counter-1)+8] + vectorY3[ times *  (counter-1)+9]+ vectorY3[ times *  (counter-1)+10] + vectorY3[ times *  (counter-1)+11] + vectorY3[ times *  (counter-1)+12]+ vectorY3[ times *  (counter-1)+13]+ vectorY3[ times *  (counter-1)+14]+ vectorY3[ times *  (counter-1)+15];
-                }
-                if (get<id>(particles[j]) == 3){
-                    random_vector[0] = vectorX4[ times * (counter-1)] + vectorX4[ times *  (counter-1)+1] + vectorX4[ times *  (counter-1)+2] + vectorX4[ times *  (counter-1)+3]+ vectorX4[ times *  (counter-1)+4]+ vectorX4[ times *  (counter-1)+5]+ vectorX4[ times *  (counter-1)+6]+ vectorX4[ times *  (counter-1)+7]+
-                                       vectorX4[ times * (counter-1)+8] + vectorX4[ times *  (counter-1)+9] + vectorX4[ times *  (counter-1)+10] + vectorX4[ times *  (counter-1)+11]+ vectorX4[ times *  (counter-1)+12]+ vectorX4[ times *  (counter-1)+13]+ vectorX4[ times *  (counter-1)+14]+ vectorX4[ times *  (counter-1)+15];
-                    random_vector[1] = vectorY4[ times *  (counter-1)] + vectorY4[ times *  (counter-1)+1]+ vectorY4[ times *  (counter-1)+2] + vectorY4[ times *  (counter-1)+3] + vectorY4[ times *  (counter-1)+4]+ vectorY4[ times *  (counter-1)+5]+ vectorY4[ times *  (counter-1)+6]+ vectorY4[ times *  (counter-1)+7] +
-                                       vectorY4[ times *  (counter-1)+8] + vectorY4[ times *  (counter-1)+9]+ vectorY4[ times *  (counter-1)+10] + vectorY4[ times *  (counter-1)+11] + vectorY4[ times *  (counter-1)+12]+ vectorY4[ times *  (counter-1)+13]+ vectorY4[ times *  (counter-1)+14]+ vectorY4[ times *  (counter-1)+15];
-                }
-
-                if (get<id>(particles[j]) == 4){
-                    random_vector[0] = vectorX5[ times * (counter-1)] + vectorX5[ times *  (counter-1)+1] + vectorX5[ times *  (counter-1)+2] + vectorX5[ times *  (counter-1)+3]+ vectorX5[ times *  (counter-1)+4]+ vectorX5[ times *  (counter-1)+5]+ vectorX5[ times *  (counter-1)+6]+ vectorX5[ times *  (counter-1)+7]+
-                                       vectorX5[ times * (counter-1)+8] + vectorX5[ times *  (counter-1)+9] + vectorX5[ times *  (counter-1)+10] + vectorX5[ times *  (counter-1)+11]+ vectorX5[ times *  (counter-1)+12]+ vectorX5[ times *  (counter-1)+13]+ vectorX5[ times *  (counter-1)+14]+ vectorX5[ times *  (counter-1)+15];
-                    random_vector[1] = vectorY5[ times *  (counter-1)] + vectorY5[ times *  (counter-1)+1]+ vectorY5[ times *  (counter-1)+2] + vectorY5[ times *  (counter-1)+3] + vectorY5[ times *  (counter-1)+4]+ vectorY5[ times *  (counter-1)+5]+ vectorY5[ times *  (counter-1)+6]+ vectorY5[ times *  (counter-1)+7] +
-                                       vectorY5[ times *  (counter-1)+8] + vectorY5[ times *  (counter-1)+9]+ vectorY5[ times *  (counter-1)+10] + vectorY5[ times *  (counter-1)+11] + vectorY5[ times *  (counter-1)+12]+ vectorY5[ times *  (counter-1)+13]+ vectorY5[ times *  (counter-1)+14]+ vectorY5[ times *  (counter-1)+15];
-                }
-
-            }
+//            if (get<id>(particles[j]) == 1){
+//                random_vector[0] = vectorX2[(counter-1)];
+//                random_vector[1] = vectorY2[(counter-1)];
+//            }
+//            if (get<id>(particles[j]) == 2){
+//                random_vector[0] = vectorX3[(counter-1)];
+//                random_vector[1] = vectorY3[(counter-1)];
+//            }
+//            if (get<id>(particles[j]) == 3){
+//                random_vector[0] = vectorX4[(counter-1)];
+//                random_vector[1] = vectorY4[(counter-1)];
+//            }
+//
+//            if (get<id>(particles[j]) == 4){
+//                random_vector[0] = vectorX5[(counter-1)];
+//                random_vector[1] = vectorY5[(counter-1)];
+//            }
+//
+////            ////dt = 0.0025
+//            if (times == 2) {
+//            if (get<id>(particles[j]) == 0){
+//                random_vector[0] = vectorX1[ times * (counter-1)] + vectorX1[ times *  (counter-1)+1];
+//                random_vector[1] = vectorY1[ times *  (counter-1)] + vectorY1[ times *  (counter-1)+1];
+//            }
+//
+//            if (get<id>(particles[j]) == 1){
+//                random_vector[0] = vectorX2[ times * (counter-1)] + vectorX2[ times *  (counter-1)+1];
+//                random_vector[1] = vectorY2[ times *  (counter-1)] + vectorY2[ times *  (counter-1)+1];
+//            }
+//            if (get<id>(particles[j]) == 2){
+//                random_vector[0] = vectorX3[ times * (counter-1)] + vectorX3[ times *  (counter-1)+1];
+//                random_vector[1] = vectorY3[ times *  (counter-1)] + vectorY3[ times *  (counter-1)+1];
+//            }
+//            if (get<id>(particles[j]) == 3){
+//                random_vector[0] = vectorX4[ times * (counter-1)] + vectorX4[ times *  (counter-1)+1];
+//                random_vector[1] = vectorY4[ times *  (counter-1)] + vectorY4[ times *  (counter-1)+1];
+//            }
+//
+//            if (get<id>(particles[j]) == 4){
+//                random_vector[0] = vectorX5[ times * (counter-1)] + vectorX5[ times *  (counter-1)+1];
+//                random_vector[1] = vectorY5[ times *  (counter-1)] + vectorY5[ times *  (counter-1)+1];
+//            }
+//            }
+////            ////dt = 0.005
+//            if (times == 4) {
+//                if (get<id>(particles[j]) == 0) {
+//                    random_vector[0] = vectorX1[times * (counter - 1)] + vectorX1[times * (counter - 1) + 1] +
+//                                       vectorX1[times * (counter - 1) + 2] + vectorX1[times * (counter - 1) + 3];
+//                    random_vector[1] = vectorY1[times * (counter - 1)] + vectorY1[times * (counter - 1) + 1] +
+//                                       vectorY1[times * (counter - 1) + 2] + vectorY1[times * (counter - 1) + 3];
+//                }
+//
+//                if (get<id>(particles[j]) == 1) {
+//                    random_vector[0] = vectorX2[times * (counter - 1)] + vectorX2[times * (counter - 1) + 1] +
+//                                       vectorX2[times * (counter - 1) + 2] + vectorX2[times * (counter - 1) + 3];
+//                    random_vector[1] = vectorY2[times * (counter - 1)] + vectorY2[times * (counter - 1) + 1] +
+//                                       vectorY2[times * (counter - 1) + 2] + vectorY2[times * (counter - 1) + 3];
+//                }
+//                if (get<id>(particles[j]) == 2) {
+//                    random_vector[0] = vectorX3[times * (counter - 1)] + vectorX3[times * (counter - 1) + 1] +
+//                                       vectorX3[times * (counter - 1) + 2] + vectorX3[times * (counter - 1) + 3];
+//                    random_vector[1] = vectorY3[times * (counter - 1)] + vectorY3[times * (counter - 1) + 1] +
+//                                       vectorY3[times * (counter - 1) + 2] + vectorY3[times * (counter - 1) + 3];
+//                }
+//                if (get<id>(particles[j]) == 3) {
+//                    random_vector[0] = vectorX4[times * (counter - 1)] + vectorX4[times * (counter - 1) + 1] +
+//                                       vectorX4[times * (counter - 1) + 2] + vectorX4[times * (counter - 1) + 3];
+//                    random_vector[1] = vectorY4[times * (counter - 1)] + vectorY4[times * (counter - 1) + 1] +
+//                                       vectorY4[times * (counter - 1) + 2] + vectorY4[times * (counter - 1) + 3];
+//                }
+//
+//                if (get<id>(particles[j]) == 4) {
+//                    random_vector[0] = vectorX5[times * (counter - 1)] + vectorX5[times * (counter - 1) + 1] +
+//                                       vectorX5[times * (counter - 1) + 2] + vectorX5[times * (counter - 1) + 3];
+//                    random_vector[1] = vectorY5[times * (counter - 1)] + vectorY5[times * (counter - 1) + 1] +
+//                                       vectorY5[times * (counter - 1) + 2] + vectorY5[times * (counter - 1) + 3];
+//                }
+//            }
+////            //dt = 0.01
+//            if (times == 8) {
+//            if (get<id>(particles[j]) == 0){
+//                random_vector[0] = vectorX1[ times * (counter-1)] + vectorX1[ times *  (counter-1)+1] + vectorX1[ times *  (counter-1)+2] + vectorX1[ times *  (counter-1)+3]+ vectorX1[ times *  (counter-1)+4]+ vectorX1[ times *  (counter-1)+5]+ vectorX1[ times *  (counter-1)+6]+ vectorX1[ times *  (counter-1)+7];
+//                random_vector[1] = vectorY1[ times *  (counter-1)] + vectorY1[ times *  (counter-1)+1]+ vectorY1[ times *  (counter-1)+2] + vectorY1[ times *  (counter-1)+3] + vectorY1[ times *  (counter-1)+4]+ vectorY1[ times *  (counter-1)+5]+ vectorY1[ times *  (counter-1)+6]+ vectorY1[ times *  (counter-1)+7];
+//            }
+//
+//            if (get<id>(particles[j]) == 1){
+//                random_vector[0] = vectorX2[ times * (counter-1)] + vectorX2[ times *  (counter-1)+1] + vectorX2[ times *  (counter-1)+2] + vectorX2[ times *  (counter-1)+3]+ vectorX2[ times *  (counter-1)+4]+ vectorX2[ times *  (counter-1)+5]+ vectorX2[ times *  (counter-1)+6]+ vectorX2[ times *  (counter-1)+7];
+//                random_vector[1] = vectorY2[ times *  (counter-1)] + vectorY2[ times *  (counter-1)+1]+ vectorY2[ times *  (counter-1)+2] + vectorY2[ times *  (counter-1)+3] + vectorY2[ times *  (counter-1)+4]+ vectorY2[ times *  (counter-1)+5]+ vectorY2[ times *  (counter-1)+6]+ vectorY2[ times *  (counter-1)+7];
+//            }
+//            if (get<id>(particles[j]) == 2){
+//                random_vector[0] = vectorX3[ times * (counter-1)] + vectorX3[ times *  (counter-1)+1] + vectorX3[ times *  (counter-1)+2] + vectorX3[ times *  (counter-1)+3]+ vectorX3[ times *  (counter-1)+4]+ vectorX3[ times *  (counter-1)+5]+ vectorX3[ times *  (counter-1)+6]+ vectorX3[ times *  (counter-1)+7];
+//                random_vector[1] = vectorY3[ times *  (counter-1)] + vectorY3[ times *  (counter-1)+1]+ vectorY3[ times *  (counter-1)+2] + vectorY3[ times *  (counter-1)+3] + vectorY3[ times *  (counter-1)+4]+ vectorY3[ times *  (counter-1)+5]+ vectorY3[ times *  (counter-1)+6]+ vectorY3[ times *  (counter-1)+7];
+//            }
+//            if (get<id>(particles[j]) == 3){
+//                random_vector[0] = vectorX4[ times * (counter-1)] + vectorX4[ times *  (counter-1)+1] + vectorX4[ times *  (counter-1)+2] + vectorX4[ times *  (counter-1)+3]+ vectorX4[ times *  (counter-1)+4]+ vectorX4[ times *  (counter-1)+5]+ vectorX4[ times *  (counter-1)+6]+ vectorX4[ times *  (counter-1)+7];
+//                random_vector[1] = vectorY4[ times *  (counter-1)] + vectorY4[ times *  (counter-1)+1]+ vectorY4[ times *  (counter-1)+2] + vectorY4[ times *  (counter-1)+3] + vectorY4[ times *  (counter-1)+4]+ vectorY4[ times *  (counter-1)+5]+ vectorY4[ times *  (counter-1)+6]+ vectorY4[ times *  (counter-1)+7];
+//            }
+//
+//            if (get<id>(particles[j]) == 4){
+//                random_vector[0] = vectorX5[ times * (counter-1)] + vectorX5[ times *  (counter-1)+1] + vectorX5[ times *  (counter-1)+2] + vectorX5[ times *  (counter-1)+3]+ vectorX5[ times *  (counter-1)+4]+ vectorX5[ times *  (counter-1)+5]+ vectorX5[ times *  (counter-1)+6]+ vectorX5[ times *  (counter-1)+7];
+//                random_vector[1] = vectorY5[ times *  (counter-1)] + vectorY5[ times *  (counter-1)+1]+ vectorY5[ times *  (counter-1)+2] + vectorY5[ times *  (counter-1)+3] + vectorY5[ times *  (counter-1)+4]+ vectorY5[ times *  (counter-1)+5]+ vectorY5[ times *  (counter-1)+6]+ vectorY5[ times *  (counter-1)+7];
+//            }
+//            }
+//
+//            //dt = 0.02
+//            if (times == 16){
+//                if (get<id>(particles[j]) == 0){
+//                    random_vector[0] = vectorX1[ times * (counter-1)] + vectorX1[ times *  (counter-1)+1] + vectorX1[ times *  (counter-1)+2] + vectorX1[ times *  (counter-1)+3]+ vectorX1[ times *  (counter-1)+4]+ vectorX1[ times *  (counter-1)+5]+ vectorX1[ times *  (counter-1)+6]+ vectorX1[ times *  (counter-1)+7]+
+//                                       vectorX1[ times * (counter-1)+8] + vectorX1[ times *  (counter-1)+9] + vectorX1[ times *  (counter-1)+10] + vectorX1[ times *  (counter-1)+11]+ vectorX1[ times *  (counter-1)+12]+ vectorX1[ times *  (counter-1)+13]+ vectorX1[ times *  (counter-1)+14]+ vectorX1[ times *  (counter-1)+15];
+//                    random_vector[1] = vectorY1[ times *  (counter-1)] + vectorY1[ times *  (counter-1)+1]+ vectorY1[ times *  (counter-1)+2] + vectorY1[ times *  (counter-1)+3] + vectorY1[ times *  (counter-1)+4]+ vectorY1[ times *  (counter-1)+5]+ vectorY1[ times *  (counter-1)+6]+ vectorY1[ times *  (counter-1)+7] +
+//                                       vectorY1[ times *  (counter-1)+8] + vectorY1[ times *  (counter-1)+9]+ vectorY1[ times *  (counter-1)+10] + vectorY1[ times *  (counter-1)+11] + vectorY1[ times *  (counter-1)+12]+ vectorY1[ times *  (counter-1)+13]+ vectorY1[ times *  (counter-1)+14]+ vectorY1[ times *  (counter-1)+15];
+//                }
+//
+//                if (get<id>(particles[j]) == 1){
+//                    random_vector[0] = vectorX2[ times * (counter-1)] + vectorX2[ times *  (counter-1)+1] + vectorX2[ times *  (counter-1)+2] + vectorX2[ times *  (counter-1)+3]+ vectorX2[ times *  (counter-1)+4]+ vectorX2[ times *  (counter-1)+5]+ vectorX2[ times *  (counter-1)+6]+ vectorX2[ times *  (counter-1)+7]+
+//                                       vectorX2[ times * (counter-1)+8] + vectorX2[ times *  (counter-1)+9] + vectorX2[ times *  (counter-1)+10] + vectorX2[ times *  (counter-1)+11]+ vectorX2[ times *  (counter-1)+12]+ vectorX2[ times *  (counter-1)+13]+ vectorX2[ times *  (counter-1)+14]+ vectorX2[ times *  (counter-1)+15];
+//                    random_vector[1] = vectorY2[ times *  (counter-1)] + vectorY2[ times *  (counter-1)+1]+ vectorY2[ times *  (counter-1)+2] + vectorY2[ times *  (counter-1)+3] + vectorY2[ times *  (counter-1)+4]+ vectorY2[ times *  (counter-1)+5]+ vectorY2[ times *  (counter-1)+6]+ vectorY2[ times *  (counter-1)+7] +
+//                                       vectorY2[ times *  (counter-1)+8] + vectorY2[ times *  (counter-1)+9]+ vectorY2[ times *  (counter-1)+10] + vectorY2[ times *  (counter-1)+11] + vectorY2[ times *  (counter-1)+12]+ vectorY2[ times *  (counter-1)+13]+ vectorY2[ times *  (counter-1)+14]+ vectorY2[ times *  (counter-1)+15];
+//
+//                }
+//                if (get<id>(particles[j]) == 2){
+//                    random_vector[0] = vectorX3[ times * (counter-1)] + vectorX3[ times *  (counter-1)+1] + vectorX3[ times *  (counter-1)+2] + vectorX3[ times *  (counter-1)+3]+ vectorX3[ times *  (counter-1)+4]+ vectorX3[ times *  (counter-1)+5]+ vectorX3[ times *  (counter-1)+6]+ vectorX3[ times *  (counter-1)+7]+
+//                                       vectorX3[ times * (counter-1)+8] + vectorX3[ times *  (counter-1)+9] + vectorX3[ times *  (counter-1)+10] + vectorX3[ times *  (counter-1)+11]+ vectorX3[ times *  (counter-1)+12]+ vectorX3[ times *  (counter-1)+13]+ vectorX3[ times *  (counter-1)+14]+ vectorX3[ times *  (counter-1)+15];
+//                    random_vector[1] = vectorY3[ times *  (counter-1)] + vectorY3[ times *  (counter-1)+1]+ vectorY3[ times *  (counter-1)+2] + vectorY3[ times *  (counter-1)+3] + vectorY3[ times *  (counter-1)+4]+ vectorY3[ times *  (counter-1)+5]+ vectorY3[ times *  (counter-1)+6]+ vectorY3[ times *  (counter-1)+7] +
+//                                       vectorY3[ times *  (counter-1)+8] + vectorY3[ times *  (counter-1)+9]+ vectorY3[ times *  (counter-1)+10] + vectorY3[ times *  (counter-1)+11] + vectorY3[ times *  (counter-1)+12]+ vectorY3[ times *  (counter-1)+13]+ vectorY3[ times *  (counter-1)+14]+ vectorY3[ times *  (counter-1)+15];
+//                }
+//                if (get<id>(particles[j]) == 3){
+//                    random_vector[0] = vectorX4[ times * (counter-1)] + vectorX4[ times *  (counter-1)+1] + vectorX4[ times *  (counter-1)+2] + vectorX4[ times *  (counter-1)+3]+ vectorX4[ times *  (counter-1)+4]+ vectorX4[ times *  (counter-1)+5]+ vectorX4[ times *  (counter-1)+6]+ vectorX4[ times *  (counter-1)+7]+
+//                                       vectorX4[ times * (counter-1)+8] + vectorX4[ times *  (counter-1)+9] + vectorX4[ times *  (counter-1)+10] + vectorX4[ times *  (counter-1)+11]+ vectorX4[ times *  (counter-1)+12]+ vectorX4[ times *  (counter-1)+13]+ vectorX4[ times *  (counter-1)+14]+ vectorX4[ times *  (counter-1)+15];
+//                    random_vector[1] = vectorY4[ times *  (counter-1)] + vectorY4[ times *  (counter-1)+1]+ vectorY4[ times *  (counter-1)+2] + vectorY4[ times *  (counter-1)+3] + vectorY4[ times *  (counter-1)+4]+ vectorY4[ times *  (counter-1)+5]+ vectorY4[ times *  (counter-1)+6]+ vectorY4[ times *  (counter-1)+7] +
+//                                       vectorY4[ times *  (counter-1)+8] + vectorY4[ times *  (counter-1)+9]+ vectorY4[ times *  (counter-1)+10] + vectorY4[ times *  (counter-1)+11] + vectorY4[ times *  (counter-1)+12]+ vectorY4[ times *  (counter-1)+13]+ vectorY4[ times *  (counter-1)+14]+ vectorY4[ times *  (counter-1)+15];
+//                }
+//
+//                if (get<id>(particles[j]) == 4){
+//                    random_vector[0] = vectorX5[ times * (counter-1)] + vectorX5[ times *  (counter-1)+1] + vectorX5[ times *  (counter-1)+2] + vectorX5[ times *  (counter-1)+3]+ vectorX5[ times *  (counter-1)+4]+ vectorX5[ times *  (counter-1)+5]+ vectorX5[ times *  (counter-1)+6]+ vectorX5[ times *  (counter-1)+7]+
+//                                       vectorX5[ times * (counter-1)+8] + vectorX5[ times *  (counter-1)+9] + vectorX5[ times *  (counter-1)+10] + vectorX5[ times *  (counter-1)+11]+ vectorX5[ times *  (counter-1)+12]+ vectorX5[ times *  (counter-1)+13]+ vectorX5[ times *  (counter-1)+14]+ vectorX5[ times *  (counter-1)+15];
+//                    random_vector[1] = vectorY5[ times *  (counter-1)] + vectorY5[ times *  (counter-1)+1]+ vectorY5[ times *  (counter-1)+2] + vectorY5[ times *  (counter-1)+3] + vectorY5[ times *  (counter-1)+4]+ vectorY5[ times *  (counter-1)+5]+ vectorY5[ times *  (counter-1)+6]+ vectorY5[ times *  (counter-1)+7] +
+//                                       vectorY5[ times *  (counter-1)+8] + vectorY5[ times *  (counter-1)+9]+ vectorY5[ times *  (counter-1)+10] + vectorY5[ times *  (counter-1)+11] + vectorY5[ times *  (counter-1)+12]+ vectorY5[ times *  (counter-1)+13]+ vectorY5[ times *  (counter-1)+14]+ vectorY5[ times *  (counter-1)+15];
+//                }
+//
+//            }
 
 
 //
 //            cout << "random " << random_vector/random_vector.norm() << endl;
 //            cout << "sum forces " << sum_forces << endl;
 
-
-            x = get<position>(particles[j]) + dt * (sum_forces)+ sqrt(2.0 * D ) *
+     if (bias == 0){ // if no bias
+              x = get<position>(particles[j]) + dt * (sum_forces)+ sqrt(2.0 * D * dt) *
                                                                   (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+     }
+          if (bias == 1){ // if biased leaders
+              if (get<type>(particles[j]) == 0){
+                               x = get<position>(particles[j]) + dt * (sum_forces)+ dt * beta+ sqrt(2.0 * D * dt) *
+                                                                  (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+              }
+              if (get<type>(particles[j]) == 1){
+                               x = get<position>(particles[j]) + dt * (sum_forces)+ sqrt(2.0 * D * dt) *
+                                                                  (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+              }
+
+     }
+               if (bias == 2){ // if all biased
+              x = get<position>(particles[j]) + dt * (sum_forces)+ dt * beta+ sqrt(2.0 * D * dt) *
+                                                                  (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+     }
+
 
 
 //            if (get<type>(particles[j]) == 0){
@@ -956,10 +1008,10 @@ for (int i = 0; i < numberofrand; i++){
         // for Mayor's, delete particles greater than 850
         countcellsinarches = 0; // this has to be uncommented!!!
         for (auto p : particles) {
-            if (get<position>(p)[0] > 850.0) {
+            if (get<position>(p)[0] > 1000.0) {
                 countcellsinarches = countcellsinarches + 1;
                 get<arches>(p) = 1;
-                 //get<alive>(p) = false;
+                // get<alive>(p) = false;
             }
         }
 
@@ -1076,16 +1128,16 @@ for (int i = 0; i < numberofrand; i++){
 
 
 
-        if (counter % int(5.0/dt ) == 0) { //  60/dt for every hour, 30.0/dt for every half an hour, 5 for every five minutes
+        if (counter % int(60.0/dt ) == 0) { //  60/dt for every hour, 30.0/dt for every half an hour, 5 for every five minutes
 
 
         //    if (t <1078){
             //if (furthestCell > 980) { // for the one to see how long it takes till they reach the end
 
-
-//            //     save at every time step
+//
+//////            //     save at every time step
 //            #ifdef HAVE_VTK
-//                vtkWriteGrid("CellsXenopus", t, particles.get_grid(true)); // EXPLACellsXenopusRepOnlys200D10timeBIAS18hrs
+//                vtkWriteGrid("XenopusBIAS0p5trialeps200D12RealRep", t, particles.get_grid(true)); // EXPLACellsXenopusRepOnlys200D10timeBIAS18hrs
 //            #endif
 
 
@@ -1102,22 +1154,22 @@ for (int i = 0; i < numberofrand; i++){
 
                 // centre of mass
 //
-            double centre_of_mass =0 ;
-            vdouble2 cellpos;
-
-            for (int i = 0; i < particles.size(); i++){
-
-                cellpos = get<position>(particles[i]);
-
-                centre_of_mass += cellpos[0];
-
-            }
-
-            centre_of_mass = centre_of_mass/particles.size();
-            MassCentreVector[imass] = centre_of_mass;
-            imass = imass+1;
-         //   cout << centre_of_mass << endl;
-        // end centre of mass
+//            double centre_of_mass =0 ;
+//            vdouble2 cellpos;
+//
+//            for (int i = 0; i < particles.size(); i++){
+//
+//                cellpos = get<position>(particles[i]);
+//
+//                centre_of_mass += cellpos[0];
+//
+//            }
+//
+//            centre_of_mass = centre_of_mass/particles.size();
+//            MassCentreVector[imass] = centre_of_mass;
+//            imass = imass+1;
+//         //   cout << centre_of_mass << endl;
+//        // end centre of mass
 
 
             // for the one to see how long it takes till they reach the end
@@ -1170,7 +1222,7 @@ for (int i = 0; i < numberofrand; i++){
 //    cout << centre_of_mass << endl;
 
 
-cout << MassCentreVector << endl;
+//cout << MassCentreVector << endl;
 
 
 
@@ -1306,7 +1358,7 @@ cout << MassCentreVector << endl;
 
 
     //return proportions;
-  //  return t;
+    return t;
 }
 
 
@@ -1315,69 +1367,87 @@ cout << MassCentreVector << endl;
 int main() {
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
-    double eps = 200.0;
+    const int sim_num = 100;
+
 
    //double vector_check_length = proportions(16); //just to know what the length is
    // cout << "ignore above" << endl;
 //
     //int num_parts = vector_check_length.size(); // number of parts that I partition my domain
     //cout << "length " << num_parts << endl;
-    //int num_parts = 17; // for 1800 timesteps
-    //MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
+//    int num_parts = 17; // for 1800 timesteps
+//    MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
+
+
+    int values = 5;
+    VectorXd epsvalues= VectorXd::Zero(values);
+    VectorXd Dvalues= VectorXd::Zero(values);
+    VectorXd betavalues= VectorXd::Zero(values);
+    epsvalues << 1,50,100,150,200;
+    Dvalues << 1,4,7,10,13;
+    betavalues << 0.1,0.4,0.7,1.0,1.3;
+
+  VectorXd time = VectorXd::Zero(sim_num);
+
+  //default values
+    double beta = 0.7; // before was
+    double D = 7.0;
+    double eps = 100.0;
 
 ////looping through D
-    double D = 5.0;
-//    for (int i=1; i < 6; i++){
-//        if (i==1){
-//            D=1.0;
-//        }else{
-//            D=double((i-1)*3);
-//        }
-//       cout << "D = " << D << endl;
-//// looping through beta
-    double beta = 0.0; // before was 0.2
-//    for (int i=1; i < 6; i++){
-//        beta = 0.01 * double(i);
-//        cout << "beta = " << beta << endl;
 
-
-      //    n would correspond to different seeds
-        ////     parallel programming
-
-       // VectorXd output = VectorXd::Zero(sim_num);
-       double output;
- //     #pragma omp parallel for
-        for (int n = 0; n < sim_num; n++) {
-
-
-            //initialise the matrix to store the values
-            //MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
-
-            //cout << " n = " << n << endl;
-            output = proportions( n, D, eps, beta);
-
-//        // This is what I am using for MATLAB
-//        ofstream output2("sepdataChickD10eps10CoACiLGROWINGDOMAIN" + to_string(n) + ".csv");
-////
-//        for (int i = 0; i < numbers.rows(); i++) {
+    for (int i=0; i < values; i++){
+    D = Dvalues(i);
+////        if (i==1){
+////            D=1.0;
+////        }else{
+////            D=double((i-1)*3);
+////        }
+//      // cout << "D = " << D << endl;
 //
-//            for (int j = 0; j < numbers.cols(); j++) {
-//
-//              output2 << numbers(i, j) << ", ";
-//
-//                sum_of_all(i, j) += numbers(i, j);
-//
-//            }
-//            output2 << "\n" << endl;
-//        }
-
-        }
-
-//}// looping through D or beta
+// looping through beta
+    for (int i=0; i < values; i++){
+        beta = betavalues(i);
+      //  beta = 0.1*double(i);// * double(i);
+      //  cout << "beta = " << beta << endl;
 
 
+//        //looping through eps
+//            for (int i=0; i < values; i++) {
+//                eps = epsvalues(i);
 
+                //    n would correspond to different seeds
+                ////     parallel programming
+
+                // VectorXd output = VectorXd::Zero(sim_num);
+
+                double output;
+#pragma omp parallel for
+                for (int n = 0; n < sim_num; n++) {
+
+
+                    //initialise the matrix to store the values
+                    //MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
+
+                    //cout << " n = " << n << endl;
+                    time(n) = proportions(n, D, eps, beta); // when check proportions
+
+
+                } // end of n simulations
+                ofstream output2(
+                        ".//XENOPUS DATA FINAL//AttrRepALLBIASEDeps" + to_string(int(eps)) + "D" + to_string(int(D)) + "beta0p" +
+                        to_string(int(beta * 10)) + ".csv");
+
+                // DO NOT FORGET TO UNCOMMENT THIS THEN OUTPUT
+                for (int i = 0; i < sim_num; i++) {
+
+                    output2 << time(i) << ", ";
+                    output2 << "\n" << endl;
+                }
+ //           }
+   // }
+    //comment to here
+//} // end of beta loop or D loop
 
 
 
@@ -1385,8 +1455,8 @@ int main() {
 //    * will store everything in one matrix, the entries will be summed over all simulations
 //    */
 
-//
-//    ofstream output3("DATAChickD10eps10CoACiLGROWINGDOMAIN.csv"); // at the end GrowingDomain
+
+//    ofstream output3("ChickCiLOnlyeps" +to_string(int(eps)) + "D"+ to_string(int(D)) + ".csv"); // at the end GrowingDomain
 //
 //
 //    for (int i = 0; i < num_parts; i++) {
@@ -1397,7 +1467,9 @@ int main() {
 //
 //        }
 //        output3 << "\n" << endl;
-//    }
+    }
+
+}// looping thorugh D or beta
 
 
 }

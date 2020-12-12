@@ -20,8 +20,8 @@ using namespace Aboria;
 using namespace Eigen; // objects VectorXd, MatrixXd
 
 
-VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
-//double proportions(int n_seed, double D, double eps_ij, double beta) {
+//VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
+double proportions(int n_seed, double D, double eps_ij, double beta) {
 //VectorXi proportions(int n_seed, double beta) {
 //double proportions(int n_seed, double beta) {
 
@@ -39,20 +39,25 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
     int length_y = 120; // Mayor 218, ours 120;// from 218 to 130 reduction NarrowDomain 130
     double Lt_old = length_x;
     int real_length_y = 120;
-    const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
+    const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs I choose
+    double cutting_time = 240; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
     double dt = 0.01; // time step
     double dx = 1; // maybe 1/100
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = beta*sqrt(dt); //0.007;//beta*sqrt(dt);;//beta;//0.02 // mean movement in x velocity for leaders
-    double mean = beta*sqrt(dt);//beta; //0.02; // mean for all other cells
+    double meanL = 0;//0.007;//beta;//0.02 // mean movement in x velocity for leaders
+    double mean = 0;//beta; //0.02; // mean for all other cells
     double cell_radius = 7.5;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
             2.0 * cell_radius; // diameter of a cell
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
+
+    // BIASED
+
+    int bias = 2; // 0 if no bias, 1 if biased leaders, 2 if all biased
 
     //double D = 5.0;//0.001; // diffusion coefficient for Brownian motion
 
@@ -272,7 +277,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
     // initialise neighbourhood search, note that the domain will grow in x velocity, so I initialise larger domain
-    particles.init_neighbour_search(vdouble2(-20, -20), 5 * vdouble2(length_x, length_y), vbool2(false, false));
+    particles.init_neighbour_search(vdouble2(-20, -20), vdouble2(4*length_x, length_y), vbool2(false, false)); // (-20,-20), so that it could go outside the boundary but then be returned by forces
 
 
     //vtkWriteGrid("TOSAVESmallerCells", t, particles.get_grid(true));
@@ -298,8 +303,9 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
     //for each timestep
-    // while (t < final_time) {//  && countcellsinarches < 5) { // the second part is to check time to invasion: for whether invasion does not happen too early!!!
-     while (t < 480.0) {//  && countcellsinarches < 5) { // the second part is to check time to invasion: for whether invasion does not happen too early!!!
+    // while (t < cutting_time) {//  && countcellsinarches < 5) { // the second part is to check time to invasion: for whether invasion does not happen too early!!!
+      while (t < final_time  && countcellsinarches < 6) { // the second part is to check time to invasion: for whether invasion does not happen too early!!!
+    // while (t < 480.0) {//  && countcellsinarches < 5) { // this is for the perturbation experiment, cut from the front or back from the donor and paste it back.
 
              //while (furthestCell < 1000.0) {
          //     while (countcellsinarches < 41 && t < 3000.0){ //Mayor 10 if 50 cells,  NarrowDomain 6 if 30 cells
@@ -309,6 +315,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
          // Mayor comment this
          //      insert new cells
          //if (particles.size() < 50) {
+        // if (counter < insert_time) { // this is for the perturbation experiments
 //              if (counter % 800 == 0){
                 //if (counter % 50 == 0){
                       bool free_position = true;
@@ -339,14 +346,25 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
                       particles.update_positions();
-               // }
+               //}
          // end of insert new cells
          t = t + dt;
 
          counter = counter + 1;
-/*
+
+
+
+
+
+
+      /*
       * Domain growth
       * */
+
+
+
+
+
 
          /*
      * Domain growth from here
@@ -479,19 +497,19 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
  // if leaders attract followers more than followers leaders and leaders leaders
 
  // forces for n=2, eps =51,102,153,204,256
-//                    eps_ij = 51.0;//153;//51.0;//56.0;
+//                    eps_ij = 0.0;//153;//51.0;//56.0;
 //                     npow = 2.0; // Lennard-Jones type model powers, attractive
 //                     mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
 //
 //                    if(get<type>(*k) == 0 && j >= get<type>(particles[j]) == 1){//LEADERS attract followers
-//                        eps_ij =51.0;//153.0;//94.0;
+//                        eps_ij =256.0;//153.0;//94.0;
 //
 //                        npow = 2.0; // Lennard-Jones type model powers, attractive
 //                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
 //
 //                    }
 //                    else{
-//                        eps_ij = 51.0;//153;//51.0;//56.0;
+//                        eps_ij = 0.0;//153;//51.0;//56.0;
 //
 //                        npow = 2.0; // Lennard-Jones type model powers, attractive
 //                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
@@ -499,32 +517,58 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //                    }
 
 
-// based on position if ahead, larger force than if behind
+//// based on position if ahead, larger force than if behind
+////
+//                     npow = 4.0; // Lennard-Jones type model powers, attractive
+//                     mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                    eps_ij = 1.5;//19.0; // 0 if no force
+//
+//                    temppos = get<position>(*k);
+//
+//
+//                    if(temppos[0] >x[0] ){
+//                        npow = 4.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij =1.5;
+//                        // attraction an repulsion, sometimes comment
+//                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
+//                                                pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
+//
+//                    }
+//                    else{
+//                        npow = 4.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij = 1.5;//19.0;
+//                        // repulsion only, if the cells only repel the cells ahead
+//                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
+//
+//                    }
 
-                     npow = 4.0; // Lennard-Jones type model powers, attractive
-                     mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
-                    eps_ij = 1.5;//19.0; // 0 if no force
 
-                    temppos = get<position>(*k);
+//  // based on position if ahead, larger force than if behind. Leaders and followers do different things
+//
+//                     npow = 4.0; // Lennard-Jones type model powers, attractive
+//                     mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                    eps_ij = 0.0;//19.0; // 0 if no force
+//
+//                    temppos = get<position>(*k);
+//
+//
+//                    if(temppos[0] >x[0] ){
+//                        npow = 2.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij =256.0;
+//                        // attraction an repulsion, sometimes comment
+//
+//                    }
+//                    else{
+//                        npow = 4.0; // Lennard-Jones type model powers, attractive
+//                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
+//                        eps_ij = 0.0;//19.0;
+//                        // repulsion only, if the cells only repel the cells ahead
+//                    }
 
 
-                    if(temppos[0] >x[0] ){
-                        npow = 4.0; // Lennard-Jones type model powers, attractive
-                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
-                        eps_ij =1.5;
-                        // attraction an repulsion, sometimes comment
-                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
-                                                pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
-
-                    }
-                    else{
-                        npow = 4.0; // Lennard-Jones type model powers, attractive
-                        mpow = 2.0*npow; //  Lennard-Jones type model powers, repulsive
-                        eps_ij = 1.5;//19.0;
-                        // repulsion only, if the cells only repel the cells ahead
-                        dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
-
-                    }
 
 
 //                     // if gradually decreasing force
@@ -552,13 +596,14 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //                        eps_ij = 51.0;
 //                    }
 
-//                     if (CiLonly == true) {
-//                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
-//                     } else {
-//                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
-//                                                 pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
-//
-//                     }
+//IMPORTANT to uncomment
+                     if (CiLonly == true) {
+                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1));
+                     } else {
+                         dzdr = npow * eps_ij * (2 * pow(sigma_max, mpow) / pow(distance, mpow + 1) -
+                                                 pow(sigma_max, npow) / pow(distance, npow + 1)); //Lennard-Jones, normally with minus but I do not put that minus when I do force_ij = f0 * dzdr * change/distance, below
+
+                     }
 
 
                      force_ij = f0 * dzdr * change / distance;
@@ -570,22 +615,23 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
              }
 
 
-             //Mayor
-             //random force, tryining to make the first part of this biased.
-             if (get<type>(particles[j]) == 0) {
-//                if (t>8000){
-//                    cout << "here even though should not be" << endl;
-//                }
-                 random_vector[0] = normalXlead(gen1); // 0.05;//
-                 // random_vector[0] = 0.05;//
+//             //Mayor
+//             //random force, tryining to make the first part of this biased.
+//             if (get<type>(particles[j]) == 0) {
+////                if (t>8000){
+////                    cout << "here even though should not be" << endl;
+////                }
+//                 random_vector[0] = normalXlead(gen1); // 0.05;//
+//                 // random_vector[0] = 0.05;//
+//
+//
+//             } else {
+//                random_vector[0] =normalX(gen1); // 0.0;//
+//                 // random_vector[0] =0;//normalX(gen1); // 0.0;//
+//             }
 
-
-             } else {
-                random_vector[0] =normalX(gen1); // 0.0;//
-                 // random_vector[0] =0;//normalX(gen1); // 0.0;//
-             }
-
-
+// generate random normals
+             random_vector[0] =normalX(gen1);
              //random_vector[0] = normalX(gen1);
              random_vector[1] = normalY(gen1);
 
@@ -596,9 +642,25 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
 
-             x = get<position>(particles[j]) + dt * (sum_forces) + sqrt(2.0 * dt * D) *
-                                                                   (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+             if (bias == 0){ // if no bias
+                 x = get<position>(particles[j]) + dt * (sum_forces)+ sqrt(2.0 * D * dt) *
+                                                                      (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+             }
+             if (bias == 1){ // if biased leaders
+                 if (get<type>(particles[j]) == 0){
+                     x = get<position>(particles[j]) + dt * (sum_forces)+ dt * beta+ sqrt(2.0 * D * dt) *
+                                                                                     (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+                 }
+                 if (get<type>(particles[j]) == 1){
+                     x = get<position>(particles[j]) + dt * (sum_forces)+ sqrt(2.0 * D * dt) *
+                                                                          (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+                 }
 
+             }
+             if (bias == 2){ // if all biased
+                 x = get<position>(particles[j]) + dt * (sum_forces)+ dt * beta+ sqrt(2.0 * D * dt) *
+                                                                                 (random_vector);// + bound_sum_forces); I could have random_vector/random_vector.norm()
+             }
 
 //            if (get<type>(particles[j]) == 0){
 //                cout << "interaction force " << (dt*sum_forces) << endl;
@@ -608,23 +670,27 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
              // boundary forces before the position is updated
 
-             if (x[0] < cell_radius) {
-                 bound_sum_forces += (cell_radius - x[0]) / x[0] * vdouble2(x[0], 0);
-             }
-             if (x[1] < cell_radius) {
-                 bound_sum_forces += (cell_radius - x[1]) / x[1] * vdouble2(0, x[1]);
 
-             }
-             if (x[1] > length_y - cell_radius - 1) {
-                 bound_sum_forces += (length_y - cell_radius - 1 - x[1]) / x[1] * vdouble2(0, x[1]);
+                 if (x[0] < cell_radius) {
+                     bound_sum_forces += (cell_radius- x[0]) / x[0] * vdouble2(x[0], 0);
+                 }
+                 if (x[1] < cell_radius) {
+                     bound_sum_forces += (cell_radius - x[1]) / x[1] * vdouble2(0, x[1]);
 
-             }
-             if (x[0] > Gamma(length_x - 1) - cell_radius) {
-                 bound_sum_forces += (Gamma(length_x - 1) - cell_radius - x[0]) / x[0] * vdouble2(x[0], 0);
+                 }
+                 if (x[1] > length_y - cell_radius - 1) {
+                     bound_sum_forces += (length_y - cell_radius - 1 - x[1]) / x[1] * vdouble2(0, x[1]);
 
-             }
+                 }
+                 if (x[0] > Gamma(length_x - 1) - cell_radius) {
+                     bound_sum_forces += (Gamma(length_x - 1) - cell_radius - x[0]) / x[0] * vdouble2(x[0], 0);
 
-             x = x + (bound_sum_forces); // boundary force
+                 }
+
+                 x = x + (bound_sum_forces); // boundary force
+
+
+
 
 
 //            bool free_position = true; // check if the neighbouring position is free
@@ -890,7 +956,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 
          if (counter % int(60.0 / dt) == 0) { //  60/dt
 
-
+             //cout << "t " << t << endl;
              //if (t >1000){
              //if (furthestCell > 980) { // for the one to see how long it takes till they reach the end
 
@@ -900,8 +966,9 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //                         //  vtkWriteGrid(".//100sim DATA Parameter Sensitivity Chick Images//CellsRepulsionReducedInfluxevery10012D19p0eps0n", t, particles.get_grid(true));
 //                         //  vtkWriteGrid(".//100sim DATA Parameter Sensitivity Chick Images//CellsRepulsionReducedInfluxevery10012D19p0eps0n", t, particles.get_grid(true));
 //                       //vtkWriteGrid("CellsAttrRepReducedInfluxevery8min12D75p0eps4n", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
-//                      vtkWriteGrid("ReducedInfluxGrowthCellsForceseps1p5n4Replead1p5n4Attr5Dcells", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
+//                   //   vtkWriteGrid("LeadBiased0p007Aheadeps256Behindeps0reducedinflux50cells", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
 //                //        vtkWriteGrid("TOPLOTCheckForcesLongRange5CellsFullPhenoSwitchFl75Lead19FORCESn4forall", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
+//                     vtkWriteGrid("ChickAttrRepepseps38D4beta0p4cells", t, particles.get_grid(true)); //.//100sim DATA Parameter Sensitivity Chick Images//
 //
 //            #endif
              //}
@@ -911,7 +978,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
              // D=6, eps = 19
 
 
-             //}
+             }
 //////
 
              // convergence, check cell positions
@@ -968,7 +1035,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //          //when I need to save some data of the matrix
 
 
-             // for Mayor's, delete particles greater than 850
+             // check if they are in final 100
              countcellsinarches = 0; // this has to be uncommented!!!
              for (auto p : particles) {
                  if (get<position>(p)[0] > Gamma(length_x - 1) - 100.0) {
@@ -978,22 +1045,31 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
              }
 
 
-         }
+         //} // end of: if (counter % int(60.0 / dt) == 0) {
      }
 
-     cout << "cells positions" << endl;
-
-     for (auto p : particles){
-         cout << get<position>(p) << endl;
-     }
-
+     //output cell positions, this is for the cut and paste experiments
+//     cout << "cells positions" << endl;
+//
+//     for (auto p : particles){
+//         cout << get<position>(p) << endl;
+//     }
 
 
 
         //cout << "Final t " << t << endl;
 
          // cout << n_seed << endl;
-         //cout << t << endl; // !!FORTIME TO INVASION
+        // cout << t << endl; // !!FORTIME TO INVASION
+//save time to invasion
+
+//    ofstream myfile;
+//    myfile.open (".//CHICK DATA FINAL//AttRepALLBIASEDTimetoInvasion"+to_string(int(eps_ij)) + "D" + to_string(int(D))+ "beta" + to_string(int(beta*10)) + ".csv", fstream::app);
+//    myfile << t << endl; // Patikrinti!!!
+//    myfile.close();
+
+//    ofstream outputtime(".//CHICK DATA FINAL//TimetoInvasion"+to_string(int(eps_ij)) + "D" + to_string(int(D))+ "beta" + to_string(int(beta*10)) + ".csv");
+//    outputtime << t << endl; // Patikrinti!!!
 
 //    // calculate pairwise distances at the end of simulations
 ////
@@ -1071,15 +1147,28 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
          }
 
 
+         // covered segments
+
+         int covered_partition = 0;
+
+
+         for (int i = 0;i<domain_partition;i++){
+             if (proportions(i) > 5){
+                 covered_partition = covered_partition +1;
+             }
+
+         }
+
+
          // positions of all the cells at the end of simulations
          //LEADONLY
          //ofstream outputpositions("PositionsAttrRepLEADONLYVARYbetaeps"+to_string(int(eps_ij)) + "beta" + to_string(int(beta*100.0)) + "nvalue" + to_string(n_seed) + ".csv");
-//    ofstream outputpositions(".//Attr Rep LEAD ONLY Chick Data Files//AttrRepLEADONLYVARYDPositionsChickeps"+to_string(int(eps_ij)) + "D" + to_string(int(D)) + "nvalue" + to_string(n_seed) + ".csv");
-//
-//    for (int j = 0; j < particles.size(); j++) {
-//        vdouble2 x = get<position>(particles[j]);
-//        outputpositions << x[0] << ", " << x[1] << endl; // Patikrinti!!!
-//    }
+    ofstream outputpositions(".//CHICK DATA FINAL POSITIONS//AttrRepLEADONLYVARYDPositionsChickeps"+to_string(int(eps_ij)) + "D" + to_string(int(D))+ "beta" + to_string(int(beta*10)) + "nvalue" + to_string(n_seed) + ".csv");
+
+    for (int j = 0; j < particles.size(); j++) {
+        vdouble2 x = get<position>(particles[j]);
+        outputpositions << x[0] << ", " << x[1] << endl; // Patikrinti!!!
+    }
 //
 
 
@@ -1137,8 +1226,12 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //
 //    }
 
+        VectorXi outputvalues = VectorXi::Zero(2);
 
-         return proportions;
+        outputvalues << domain_partition,covered_partition;
+
+     //    return proportions;
+    return t;
 
      }
 
@@ -1150,79 +1243,101 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
     int main() {
 
         const int number_parameters = 1; // parameter range
-        const int sim_num = 1; // it used to be 20 here
-        double eps = 19.0; // 0.4, 19.0, 38.0, 56.0, 75.0, 94.0
-        VectorXi vector_check_length =proportions( 0, 5.0, 19.0, 0.0);; //just to know what the length is
-        //cout << "ignore above" << endl;
-//
+        const int sim_num = 100; // it used to be 20 here//
         //   int num_parts = vector_check_length.size(); // number of parts that I partition my domain
         //  cout << "length " << vector_check_length.size() << endl;
-        int num_parts = 11; // for 1080 timesteps
-        MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
+        //int num_parts = 2; // for 1080 timesteps
+     //   MatrixXf sum_of_all = MatrixXf::Zero(num_parts, number_parameters); // sum of the values over all simulations
 
 
+    int values = 5;
+    VectorXd epsvalues= VectorXd::Zero(values);
+    VectorXd Dvalues= VectorXd::Zero(values);
+    VectorXd betavalues= VectorXd::Zero(values);
+    epsvalues << 0.4,19.0,38.0,56.0,75.0; //
+    Dvalues << 1,4,7,10,13;
+    betavalues << 0.1,0.4,0.7,1.0,1.3;
 
-//looping through D
-        double D = 5.0;
-//        for (int i=1; i < 7; i++) {
-//            if (i == 1) {
-//                D = 1.0;
-//            } else {
-//                D = double((i - 1) * 3);
-//            }
-//            //    cout << "D = " << D << endl;
-//
+    VectorXd time = VectorXd::Zero(sim_num);
+
+
+    //default values
+    double beta = 0.4; // before was
+    double D = 4.0;
+    double eps = 38.0;
+
+ //   VectorXi vector_check_length = proportions(0, D, eps, beta);; //just to know what the length is
+    //cout << vector_check_length << endl;
+ //   VectorXi vector_check_length2 = proportions(2, D, eps, beta);; //just to know what the length is
+
+    for (int i=0; i < values; i++){
+        D = Dvalues(i);
+
+
 //// looping through beta
-           double beta = 0.0;//0.02;
-////    for (int i=1; i < 6; i++){
-////        beta = 0.01 * double(i);
-//            //cout << "beta = " << beta << endl;
+    for (int i=0; i < values; i++){
+        beta = betavalues(i);
+
+        //looping through eps
+//        for (int i=0; i < values; i++) {
+//            eps = epsvalues(i);
+
+            //VectorXi vector_check_length = proportions(0, D, eps, beta);; //just to know what the length is
 
 
-            //    n would correspond to different seeds
-            ////     parallel programming
-            //WCHAR* folder = L".\\TestFolder";
-            double timebutnothing;
 
-            //comment from here
+//    comment from here
 
-//#pragma omp parallel for
-//            for (int n = 0; n < sim_num; n++) {
+#pragma omp parallel for
+            for (int n = 0; n < sim_num; n++) {
+
+
+                //initialise the matrix to store the values
+                //MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
+
+        //cout << " n = " << n << endl;
+                //numbers.block(0, 0, num_parts, 1) = proportions( n, D, eps, beta); // when check proportions
+        time(i) = proportions( n, D, eps, beta); // when check proportions
+
+        // This is what I am using for MATLAB
+       //ofstream output2("AttrRepLEADONLYVARYbetasepdataChiceps" +to_string(int(eps)) + "beta" + to_string(int(beta*100)) + "nvalue" + to_string(n) + ".csv");
+       //ofstream output2(".//Rep Only Chick Data Files//RepOnlyVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+      //ofstream output2(".//Rep Only Chick Data Files//RepOnlyNOGROWTHVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+       // ofstream output2(".//Rep Only Chick Data Files//RepOnlyREDUCEDINFLUX50cellsVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv"); // these are for attraction and repulsion, mistake!!!
+      //  ofstream output2(".//Perturbations data Chick/RepOnlyREDUCEDINFLUXevery100stepsVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+      //  ofstream output2(".//Perturbations data Chick/RepOnlyREDUCEDINFLUX50cellsVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+
+        //ofstream output2(".//Attr Rep Chick Data Files//AttrRepVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+//        ofstream output2(".//Attr Rep LEAD ONLY Chick Data Files//AttrRepLEADONLYVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
+//          ofstream output2(".//CHICK DATA FINAL//AttrRepALLBIASEDepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D))+ "beta" + to_string(int(beta*10)) + "nvalue" + to_string(n) + ".csv");
+//        //
+// DO NOT FORGET TO UNCOMMENT THIS THEN OUTPUT
+//        for (int i = 0; i < numbers.rows(); i++) {
 //
+//            for (int j = 0; j < numbers.cols(); j++) {
 //
-//                //initialise the matrix to store the values
-//                MatrixXi numbers = MatrixXi::Zero(num_parts, number_parameters);
+//              output2 << numbers(i, j) << ", ";
 //
-//        //cout << " n = " << n << endl;
-//        numbers.block(0, 0, num_parts, 1) = proportions( n, D, eps, beta); // when check proportions
-//        //timebutnothing = proportions( n, D, eps, beta); // when check proportions
+//                sum_of_all(i, j) += numbers(i, j);
 //
-//        // This is what I am using for MATLAB
-//       //ofstream output2("AttrRepLEADONLYVARYbetasepdataChiceps" +to_string(int(eps)) + "beta" + to_string(int(beta*100)) + "nvalue" + to_string(n) + ".csv");
-//       //ofstream output2(".//Rep Only Chick Data Files//RepOnlyVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
-//      //ofstream output2(".//Rep Only Chick Data Files//RepOnlyNOGROWTHVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
-//       // ofstream output2(".//Rep Only Chick Data Files//RepOnlyREDUCEDINFLUX50cellsVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv"); // these are for attraction and repulsion, mistake!!!
-//      //  ofstream output2(".//Perturbations data Chick/RepOnlyREDUCEDINFLUXevery100stepsVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
-//      //  ofstream output2(".//Perturbations data Chick/RepOnlyREDUCEDINFLUX50cellsVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
-//
-//        //ofstream output2(".//Attr Rep Chick Data Files//AttrRepVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
-////        ofstream output2(".//Attr Rep LEAD ONLY Chick Data Files//AttrRepLEADONLYVARYDsepdataChiceps" +to_string(int(eps)) + "D" + to_string(int(D)) + "nvalue" + to_string(n) + ".csv");
-////        //
-//// DO NOT FORGET TO UNCOMMENT THIS THEN OUTPUT
-////        for (int i = 0; i < numbers.rows(); i++) {
-////
-////            for (int j = 0; j < numbers.cols(); j++) {
-////
-////              output2 << numbers(i, j) << ", ";
-////
-////                sum_of_all(i, j) += numbers(i, j);
-////
-////            }
-////            output2 << "\n" << endl;
-////        }
-//
-//    } // end of n simulations
-//
+//            }
+//            output2 << "\n" << endl;
+//        }
+
+    } // end of n simulations
+
+
+            ofstream output2(
+                    ".//CHICK DATA FINAL//AttrRepALLBIASEDeps" + to_string(int(eps)) + "D" + to_string(int(D)) + "beta0p" +
+                    to_string(int(beta * 10)) + ".csv");
+
+            // DO NOT FORGET TO UNCOMMENT THIS THEN OUTPUT
+            for (int i = 0; i < sim_num; i++) {
+
+                output2 << time(i) << ", ";
+                output2 << "\n" << endl;
+            }
+
 
     //comment to here
 
@@ -1234,7 +1349,7 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //    */
 
 
-//    ofstream output3("ChickCiLOnlyeps" +to_string(int(eps)) + "D"+ to_string(int(D)) + ".csv"); // at the end GrowingDomain
+//    ofstream output3(".//CHICK DATA FINAL//AttrRepALLBIASEDeps" +to_string(int(eps)) + "D"+ to_string(int(D))+ "beta"+ to_string(int(beta*10)) + ".csv"); // at the end GrowingDomain
 //
 //
 //    for (int i = 0; i < num_parts; i++) {
@@ -1247,5 +1362,6 @@ VectorXi proportions(int n_seed, double D, double eps_ij, double beta) {
 //        output3 << "\n" << endl;
 //    }
 
-//}// looping thorugh D or beta
+        }//looping thorugh D, eps or beta
+    }//looping thorugh D, eps or beta
 }
