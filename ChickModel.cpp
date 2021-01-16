@@ -26,7 +26,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 //double proportions(int n_seed, double beta) {
 
     bool domain_growth = true; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = false;
+    bool CiLonly = true;
 
     int length_x;
     if (domain_growth == false) {
@@ -39,7 +39,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     int length_y = 120; // Mayor 218, ours 120;// from 218 to 130 reduction NarrowDomain 130
     double Lt_old = length_x;
     int real_length_y = 120;
-    const double final_time = 1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs I choose
+    const double final_time = 1440;//1080; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs I choose
+    double final_domain_growth = 1080; // domain grows for 18 hours
     double cutting_time = 240; // 18hrs number of timesteps, 1min - 1timestep, from 6h tp 24hours. 1440 if 24hrs, 1080 - 18hrs
     double t = 0.0; // initialise time
     double dt = 0.01; // time step
@@ -362,9 +363,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
       * */
 
 
-
-
-
+        if (t< final_domain_growth){ //domain grows only 18 hours
 
          /*
      * Domain growth from here
@@ -376,8 +375,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
               * Piecewise constant // all linear, for presentation
               * */
 
-             Gamma(length_x - 1) = (L_inf * exp(alpha * (24.0 / final_time * t - t_s)) /
-                                    (L_inf / L0 + exp(alpha * (24.0 / final_time * t - t_s)) - 1)) +
+             Gamma(length_x - 1) = (L_inf * exp(alpha * (24.0 / final_domain_growth * t - t_s)) /
+                                    (L_inf / L0 + exp(alpha * (24.0 / final_domain_growth * t - t_s)) - 1)) +
                                    k_0;
 
              for (int i = 0; i < length_x - 1; i++) {
@@ -433,6 +432,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
          }
+        }// end of t_final_domain_growth
          /*
          * Domain growth to here
         * */
@@ -835,17 +835,6 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
          particles.update_positions(); // not sure if needed here
 
 //        // calculate pairwise distances
@@ -1163,7 +1152,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
          // positions of all the cells at the end of simulations
          //LEADONLY
          //ofstream outputpositions("PositionsAttrRepLEADONLYVARYbetaeps"+to_string(int(eps_ij)) + "beta" + to_string(int(beta*100.0)) + "nvalue" + to_string(n_seed) + ".csv");
-    ofstream outputpositions(".//CHICK DATA FINAL POSITIONS//AttrRepLEADONLYVARYDPositionsChickeps"+to_string(int(eps_ij)) + "D" + to_string(int(D))+ "beta" + to_string(int(beta*10)) + "nvalue" + to_string(n_seed) + ".csv");
+    ofstream outputpositions(".//CHICK DATA FINAL POSITIONS3//RepOnlyALLBiasedPositionsChickeps"+to_string(int(eps_ij)) + "D" + to_string(int(D))+ "beta" + to_string(int(beta*10)) + "nvalue" + to_string(n_seed) + ".csv");
 
     for (int j = 0; j < particles.size(); j++) {
         vdouble2 x = get<position>(particles[j]);
@@ -1262,16 +1251,16 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
     //default values
-    double beta = 0.4; // before was
-    double D = 4.0;
+    double beta = 0.4; // before for biased, 0.0 for no bias
+    double D = 7.0;
     double eps = 38.0;
 
  //   VectorXi vector_check_length = proportions(0, D, eps, beta);; //just to know what the length is
     //cout << vector_check_length << endl;
  //   VectorXi vector_check_length2 = proportions(2, D, eps, beta);; //just to know what the length is
 
-    for (int i=0; i < values; i++){
-        D = Dvalues(i);
+//    for (int i=0; i < values; i++){
+//        D = Dvalues(i);
 
 
 //// looping through beta
@@ -1279,8 +1268,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
         beta = betavalues(i);
 
         //looping through eps
-//        for (int i=0; i < values; i++) {
-//            eps = epsvalues(i);
+        for (int i=0; i < values; i++) {
+            eps = epsvalues(i);
 
             //VectorXi vector_check_length = proportions(0, D, eps, beta);; //just to know what the length is
 
@@ -1297,7 +1286,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
         //cout << " n = " << n << endl;
                 //numbers.block(0, 0, num_parts, 1) = proportions( n, D, eps, beta); // when check proportions
-        time(i) = proportions( n, D, eps, beta); // when check proportions
+        time(n) = proportions( n, D, eps, beta); // when check proportions
 
         // This is what I am using for MATLAB
        //ofstream output2("AttrRepLEADONLYVARYbetasepdataChiceps" +to_string(int(eps)) + "beta" + to_string(int(beta*100)) + "nvalue" + to_string(n) + ".csv");
@@ -1328,8 +1317,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
 
             ofstream output2(
-                    ".//CHICK DATA FINAL//AttrRepALLBIASEDeps" + to_string(int(eps)) + "D" + to_string(int(D)) + "beta0p" +
-                    to_string(int(beta * 10)) + ".csv");
+                    ".//CHICK DATA FINAL3//RepOnlyALLBiasedeps" + to_string(int(eps)) + "D" + to_string(int(D)) + "beta0p" +
+                    to_string(int(beta * 10)) + ".csv"); // AttrRepALLBiasedeps
 
             // DO NOT FORGET TO UNCOMMENT THIS THEN OUTPUT
             for (int i = 0; i < sim_num; i++) {

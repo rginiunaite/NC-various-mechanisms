@@ -1,9 +1,10 @@
-% parameter sensitivity analysis
-% Vary D and beta
-%eps =100.0
+% Chick parameter sensitivity analysis
+% Vary D and epsilon
+%beta =0.7
 
-model = 1; % 0 - AttrRepALLBIASEd, 1 - RepOnlyALLBIASED, 2 - AttrRepBiasedLeaders, not in this on: 3 AttrRep
-final = 1440; % 2999 when 50 hours. 1440 when 24h
+model = 0; % 0 - AttrRepALLBiasedeps, 1 - RepOnlyALLBiased, 2 - AttrRepBiasedLeaders,  3 AttrRep, 4 Rep Only
+final = 1200; % 1440 if 24 hours, 1080-if 18h
+
 
 N = 5;
 alldata = zeros(N,N);
@@ -12,40 +13,42 @@ nanmatrix = zeros(N,N);
 
 Dvalues  = [13,10,7,4,1];
 betavalues = [13,10,7,4,1];
-epsvalues = [200,150,100,50,1];
+epsvalues = [0,19,38,56,75];
 
 
 % %% Vary beta and eps
 % 
 % 
-% beta = 0.1
+% eps = 0.4
 for count = 1:N
     i = Dvalues(count);
     % old
     %filename = sprintf('Parameter Sensitivity/CoACiLeps1beta0p0%i.csv', i);
     %filename = sprintf('Parameter Sensitivity/CiLOnlyeps1D5beta0p0%i.csv', i);
     % new
-    %filename = sprintf('NEW DATA XENOPUS/Attrrepeps1D6beta0p%i.csv', i);
-    %filename = sprintf('NEW DATA XENOPUS/RepOnlyeps1D6beta0p%i.csv', i);
+    %filename = sprintf('NEW DATA CHICK/Attrrepeps1D6beta0p%i.csv', i);
+    %filename = sprintf('NEW DATA CHICK/RepOnlyeps1D6beta0p%i.csv', i);
     
     
      
     if model == 0
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepALLBIASEDto850eps100D%ibeta0p1.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepALLBiasedeps0D%ibeta0p4.csv', i);
     end
    if model == 1
-     filename = sprintf('XENOPUS DATA FINAL2/RepOnlyALLBIASEDto850eps100D%ibeta0p1.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyALLBiasedeps0D%ibeta0p4.csv', i);
    end 
         
     if model == 2
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepBIASEDLEADERSeps100D%ibeta0p1.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepBiasedLeaderseps0D%ibeta0p4.csv', i);
     end
    if model == 3
-     filename = sprintf('XENOPUS DATA FINAL2/AttrRepeps100D%ibeta0p1.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/AttrRepeps0D%ibeta0p0.csv', i);
    end
-
+   if model == 4
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyeps0D%ibeta0p0.csv', i);
+   end
     sepdata = load(filename);  
-     indices = find(abs(sepdata)>final); % only values smaller than 3000, which is 50h
+     indices = find(abs(sepdata)>final); % only values smaller than final, which is 18h
     sepdata(indices) = NaN;
     
     % count the number of nan
@@ -58,32 +61,37 @@ for count = 1:N
 end
 
 % 
-% beta 0.4
+% eps = 19
 for count = 1:N
     i = Dvalues(count);
     %  filename = sprintf('Parameter Sensitivity/CoACiLeps50beta0p0%i.csv', i);
 %   filename = sprintf('Parameter Sensitivity/CiLOnlyeps50D5beta0p0%i.csv', i);
 
     % new
-    %filename = sprintf('NEW DATA XENOPUS/Attrrepeps50D6beta0p%i.csv', i);
-    %filename = sprintf('NEW DATA XENOPUS/RepOnlyeps50D6beta0p%i.csv', i);
-   % filename = sprintf('NEW DATA XENOPUS/AttrRepOnlyBiasedLeaderseps50D6beta0p%i.csv', i);
+    %filename = sprintf('NEW DATA CHICK/Attrrepeps50D6beta0p%i.csv', i);
+    %filename = sprintf('NEW DATA CHICK/RepOnlyeps50D6beta0p%i.csv', i);
+   % filename = sprintf('NEW DATA CHICK/AttrRepOnlyBiasedLeaderseps50D6beta0p%i.csv', i);
 
+     
     if model == 0
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepALLBIASEDto850eps100D%ibeta0p4.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepALLBiasedeps19D%ibeta0p4.csv', i);
     end
    if model == 1
-     filename = sprintf('XENOPUS DATA FINAL2/RepOnlyALLBIASEDto850eps100D%ibeta0p4.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyALLBiasedeps19D%ibeta0p4.csv', i);
    end 
         
     if model == 2
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepBIASEDLEADERSeps100D%ibeta0p4.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepBiasedLeaderseps19D%ibeta0p4.csv', i);
     end
    if model == 3
-     filename = sprintf('XENOPUS DATA FINAL2/AttrRepeps100D%ibeta0p4.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/AttrRepeps19D%ibeta0p0.csv', i);
    end
+      if model == 4
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyeps19D%ibeta0p0.csv', i);
+   end
+   
     sepdata = load(filename);  
-     indices = find(abs(sepdata)>final); % only values smaller than 3000, which is 50h
+     indices = find(abs(sepdata)>final); % only values smaller than 18h
     sepdata(indices) = NaN;
     
     % count the number of nan
@@ -96,32 +104,35 @@ for count = 1:N
 
 end
 
-% beta 0.7
+% eps = 38
 for count = 1:N
     i = Dvalues(count);
       % filename = sprintf('Parameter Sensitivity/CoACiLeps100beta0p0%i.csv', i);
 %    filename = sprintf('Parameter Sensitivity/CiLOnlyeps100D5beta0p0%i.csv', i);
 
     % new
-   % filename = sprintf('NEW DATA XENOPUS/Attrrepeps100D6beta0p%i.csv', i);
-   % filename = sprintf('NEW DATA XENOPUS/RepOnlyeps100D6beta0p%i.csv', i);
-   %   filename = sprintf('NEW DATA XENOPUS/AttrRepOnlyBiasedLeaderseps100D6beta0p%i.csv', i);
+   % filename = sprintf('NEW DATA CHICK/Attrrepeps100D6beta0p%i.csv', i);
+   % filename = sprintf('NEW DATA CHICK/RepOnlyeps100D6beta0p%i.csv', i);
+   %   filename = sprintf('NEW DATA CHICK/AttrRepOnlyBiasedLeaderseps100D6beta0p%i.csv', i);
    
     if model == 0
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepALLBIASEDto850eps100D%ibeta0p7.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepALLBiasedeps38D%ibeta0p4.csv', i);
     end
    if model == 1
-     filename = sprintf('XENOPUS DATA FINAL2/RepOnlyALLBIASEDto850eps100D%ibeta0p7.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyALLBiasedeps38D%ibeta0p4.csv', i);
    end 
         
     if model == 2
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepBIASEDLEADERSeps100D%ibeta0p7.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepBiasedLeaderseps38D%ibeta0p4.csv', i);
     end
    if model == 3
-     filename = sprintf('XENOPUS DATA FINAL2/AttrRepeps100D%ibeta0p7.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/AttrRepeps38D%ibeta0p0.csv', i);
+   end
+      if model == 4
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyeps38D%ibeta0p0.csv', i);
    end
     sepdata = load(filename);  
-     indices = find(abs(sepdata)>final); % only values smaller than 3000, which is 50h
+     indices = find(abs(sepdata)>final); % only values smaller than 18h
     sepdata(indices) = NaN;
     
     % count the number of nan
@@ -135,33 +146,35 @@ for count = 1:N
 end
 
 
-% beta 0.10
+% eps = 56
 for count = 1:N
     i = Dvalues(count);
      % filename = sprintf('Parameter Sensitivity/CoACiLeps150beta0p0%i.csv', i);
 %  filename = sprintf('Parameter Sensitivity/CiLOnlyeps150D5beta0p0%i.csv', i);
   
       % new
-   % filename = sprintf('NEW DATA XENOPUS/Attrrepeps150D6beta0p%i.csv', i);
-    %  filename = sprintf('NEW DATA XENOPUS/RepOnlyeps150D6beta0p%i.csv', i);
-    %filename = sprintf('NEW DATA XENOPUS/AttrRepOnlyBiasedLeaderseps150D6beta0p%i.csv', i);
+   % filename = sprintf('NEW DATA CHICK/Attrrepeps150D6beta0p%i.csv', i);
+    %  filename = sprintf('NEW DATA CHICK/RepOnlyeps150D6beta0p%i.csv', i);
+    %filename = sprintf('NEW DATA CHICK/AttrRepOnlyBiasedLeaderseps150D6beta0p%i.csv', i);
      
-    if model == 0
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepALLBIASEDto850eps100D%ibeta0p10.csv', i);
+        if model == 0
+    filename = sprintf('CHICK DATA FINAL3/AttrRepALLBiasedeps56D%ibeta0p4.csv', i);
     end
    if model == 1
-     filename = sprintf('XENOPUS DATA FINAL2/RepOnlyALLBIASEDto850eps100D%ibeta0p10.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyALLBiasedeps56D%ibeta0p4.csv', i);
    end 
         
     if model == 2
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepBIASEDLEADERSeps100D%ibeta0p10.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepBiasedLeaderseps56D%ibeta0p4.csv', i);
     end
    if model == 3
-     filename = sprintf('XENOPUS DATA FINAL2/AttrRepeps100D%ibeta0p10.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/AttrRepeps56D%ibeta0p0.csv', i);
    end
-    
+     if model == 4
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyeps56D%ibeta0p0.csv', i);
+   end  
       sepdata = load(filename);  
-     indices = find(abs(sepdata)>final); % only values smaller than 3000, which is 50h
+     indices = find(abs(sepdata)>final); % only values smaller than 18h
     sepdata(indices) = NaN;
     
     % count the number of nan
@@ -174,33 +187,36 @@ for count = 1:N
 
 end
 
-% beta 0.13
+% eps = 75
 for count = 1:N
     i = Dvalues(count);
     % filename = sprintf('Parameter Sensitivity/CoACiLeps200beta0p0%i.csv', i);
    %  filename = sprintf('Parameter Sensitivity/CiLOnlyeps200D5beta0p0%i.csv', i);
      
          % new
-    %filename = sprintf('NEW DATA XENOPUS/Attrrepeps200D6beta0p%i.csv', i);
-     %    filename = sprintf('NEW DATA XENOPUS/RepOnlyeps200D6beta0p%i.csv', i);
-     % filename = sprintf('NEW DATA XENOPUS/AttrRepOnlyBiasedLeaderseps200D6beta0p%i.csv', i);
+    %filename = sprintf('NEW DATA CHICK/Attrrepeps200D6beta0p%i.csv', i);
+     %    filename = sprintf('NEW DATA CHICK/RepOnlyeps200D6beta0p%i.csv', i);
+     % filename = sprintf('NEW DATA CHICK/AttrRepOnlyBiasedLeaderseps200D6beta0p%i.csv', i);
 
-    if model == 0
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepALLBIASEDto850eps100D%ibeta0p13.csv', i);
+     if model == 0
+    filename = sprintf('CHICK DATA FINAL3/AttrRepALLBiasedeps75D%ibeta0p4.csv', i);
     end
    if model == 1
-     filename = sprintf('XENOPUS DATA FINAL2/RepOnlyALLBIASEDto850eps100D%ibeta0p13.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyALLBiasedeps75D%ibeta0p4.csv', i);
    end 
         
     if model == 2
-    filename = sprintf('XENOPUS DATA FINAL2/AttrRepBIASEDLEADERSeps100D%ibeta0p13.csv', i);
+    filename = sprintf('CHICK DATA FINAL3/AttrRepBiasedLeaderseps75D%ibeta0p4.csv', i);
     end
    if model == 3
-     filename = sprintf('XENOPUS DATA FINAL2/AttrRepeps100D%ibeta0p13.csv', i);
+     filename = sprintf('CHICK DATA FINAL3/AttrRepeps75D%ibeta0p0.csv', i);
    end
-     
+     if model == 4
+     filename = sprintf('CHICK DATA FINAL3/RepOnlyeps75D%ibeta0p0.csv', i);
+   end
+       
     sepdata = load(filename);  
-     indices = find(abs(sepdata)>final); % only values smaller than 3000, which is 50h
+     indices = find(abs(sepdata)>final); % only values smaller than 18h
     sepdata(indices) = NaN;
     
     % count the number of nan
@@ -219,9 +235,9 @@ end
 %     % filename = sprintf('Parameter Sensitivity/CiLOnlyeps250D5beta0p0%i.csv', i);
 %      
 %     % new
-%     %filename = sprintf('NEW DATA XENOPUS/Attrrepeps250D6beta0p%i.csv', i);
-%      % filename = sprintf('NEW DATA XENOPUS/RepOnlyeps250D6beta0p%i.csv', i);
-%       filename = sprintf('NEW DATA XENOPUS/AttrRepOnlyBiasedLeaderseps250D6beta0p%i.csv', i);
+%     %filename = sprintf('NEW DATA CHICK/Attrrepeps250D6beta0p%i.csv', i);
+%      % filename = sprintf('NEW DATA CHICK/RepOnlyeps250D6beta0p%i.csv', i);
+%       filename = sprintf('NEW DATA CHICK/AttrRepOnlyBiasedLeaderseps250D6beta0p%i.csv', i);
 % 
 %     sepdata = load(filename);  
 %      indices = find(abs(sepdata)>2999); % only values smaller than 3000, which is 50h
@@ -259,9 +275,9 @@ alldatastd = alldatastd/60;
     
    % caxis([10, 50]);
  xticks([1,2,3,4,5, 6]);%,6])
- xticklabels({'0.1','0.3','0.7','1.0','1.3'});
+ xticklabels({'0.4','19.0','38.0','56.0','75.0'});
 
- xlabel('\beta','FontSize',14)
+ xlabel('\epsilon','FontSize',14)
  ylabel('D','FontSize',14)
   yticks([1,2,3,4,5, 6]);%,6])
 %yticklabels({'0.05','0.04','0.03','0.02','0.01','1'});
@@ -292,10 +308,10 @@ set(C,'xticklabel',L)
  %caxis([10, 70]); % for mean
  %caxis([0, 17]); % for std
  xticks([1,2,3,4,5, 6]);%,6])
- xticklabels({'0.1','0.3','0.7','1.0','1.3'});
+ xticklabels({'0.4','19.0','38.0','56.0','75.0'});
 
 
- xlabel('\beta','FontSize',14)
+ xlabel('\epsilon','FontSize',14)
  ylabel('D','FontSize',14)
   yticks([1,2,3,4,5, 6]);%,6])
 %yticklabels({'0.05','0.04','0.03','0.02','0.01','1'});

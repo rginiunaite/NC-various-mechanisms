@@ -29,7 +29,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 //double proportions(int n_seed, double beta) {
 
     bool domain_growth = false; // if false change length_x to 1100, true 300, Mayor false
-    bool CiLonly = false;
+    bool CiLonly = true;
 
     int length_x;
     if (domain_growth == false) {
@@ -54,8 +54,8 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
     int counter = 0; // to count simulations
     const size_t N = 5; // initial number of cells Mayor narrow domain, NarrowDomain 3
     double sigma = 2.0;
-    double meanL = 0;// // mean movement in x velocity
-    double mean = 0;//
+    double meanL = 0.0;// // mean movement in x velocity
+    double mean = 0.0;//
     double cell_radius = 20.0;//// radius of a cell, Mayor 20.0, smallercells, ours 7.5
     double positions = cell_radius; // Mayor, only change for small cells smallercells 20.0
     const double diameter =
@@ -494,37 +494,37 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
 
         // Mayor comment this
         //      insert new cells
-        if (particles.size()<50) {
-        //if (counter % 100 == 0){
-        bool free_position = true;
-        particle_type::value_type f;
-
-        get<position>(f) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
-
-        /*
-         * loop over all neighbouring leaders within "dem_diameter" distance
-         */
-        for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), diameter); tpl != false; ++tpl) {
-
-            vdouble2 diffx = tpl.dx();
-
-            if (diffx.norm() < diameter) {
-                free_position = false;
-                break;
-            }
-        }
-
-        // all the cells are of the same type
-        get<type>(f) = 1; // leaders, Mayor, comment
-
-        if (free_position) {
-
-            particles.push_back(f);
-        }
-
-
-        particles.update_positions();
-        }
+//        if (particles.size()<50) {
+//        //if (counter % 100 == 0){
+//        bool free_position = true;
+//        particle_type::value_type f;
+//
+//        get<position>(f) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
+//
+//        /*
+//         * loop over all neighbouring leaders within "dem_diameter" distance
+//         */
+//        for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), diameter); tpl != false; ++tpl) {
+//
+//            vdouble2 diffx = tpl.dx();
+//
+//            if (diffx.norm() < diameter) {
+//                free_position = false;
+//                break;
+//            }
+//        }
+//
+//        // all the cells are of the same type
+//        get<type>(f) = 1; // leaders, Mayor, comment
+//
+//        if (free_position) {
+//
+//            particles.push_back(f);
+//        }
+//
+//
+//        particles.update_positions();
+//        }
         // end of insert new cells
         t = t + dt;
 
@@ -1008,7 +1008,7 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
         // for Mayor's, delete particles greater than 850
         countcellsinarches = 0; // this has to be uncommented!!!
         for (auto p : particles) {
-            if (get<position>(p)[0] > 1000.0) {
+            if (get<position>(p)[0] > 850.0) {
                 countcellsinarches = countcellsinarches + 1;
                 get<arches>(p) = 1;
                 // get<alive>(p) = false;
@@ -1135,9 +1135,9 @@ double proportions(int n_seed, double D, double eps_ij, double beta) {
             //if (furthestCell > 980) { // for the one to see how long it takes till they reach the end
 
 //
-//////            //     save at every time step
+////            //     save at every time step
 //            #ifdef HAVE_VTK
-//                vtkWriteGrid("XenopusBIAS0p5trialeps200D12RealRep", t, particles.get_grid(true)); // EXPLACellsXenopusRepOnlys200D10timeBIAS18hrs
+//                vtkWriteGrid("XenopusBIAS0p4trialeps200D6biasedleaderscells", t, particles.get_grid(true)); // EXPLACellsXenopusRepOnlys200D10timeBIAS18hrs
 //            #endif
 
 
@@ -1396,8 +1396,8 @@ int main() {
 
 ////looping through D
 
-    for (int i=0; i < values; i++){
-    D = Dvalues(i);
+//    for (int i=0; i < values; i++){
+//    D = Dvalues(i);
 ////        if (i==1){
 ////            D=1.0;
 ////        }else{
@@ -1412,9 +1412,9 @@ int main() {
       //  cout << "beta = " << beta << endl;
 
 
-//        //looping through eps
-//            for (int i=0; i < values; i++) {
-//                eps = epsvalues(i);
+        //looping through eps
+            for (int i=0; i < values; i++) {
+                eps = epsvalues(i);
 
                 //    n would correspond to different seeds
                 ////     parallel programming
@@ -1435,7 +1435,7 @@ int main() {
 
                 } // end of n simulations
                 ofstream output2(
-                        ".//XENOPUS DATA FINAL//AttrRepALLBIASEDeps" + to_string(int(eps)) + "D" + to_string(int(D)) + "beta0p" +
+                        ".//XENOPUS DATA FINAL2//RepOnlyALLBIASEDto850eps" + to_string(int(eps)) + "D" + to_string(int(D)) + "beta0p" +
                         to_string(int(beta * 10)) + ".csv");
 
                 // DO NOT FORGET TO UNCOMMENT THIS THEN OUTPUT
@@ -1444,7 +1444,7 @@ int main() {
                     output2 << time(i) << ", ";
                     output2 << "\n" << endl;
                 }
- //           }
+    //        }
    // }
     //comment to here
 //} // end of beta loop or D loop
