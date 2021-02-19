@@ -48,18 +48,17 @@ def readcsv(filename):
 # yourArray = readcsv('../Attr Rep LEAD ONLY Chick Data Files/AttrRepLEADONLYVARYDPositionsChickeps19D6nvalue0.csv')
 # yourArray = readcsv('../Attr Rep ALLBIASED Chick Data Files/AttrRepALLBIASEDVARYDPositionsChickeps75D3nvalue0.csv')
 
-yourArray = readcsv('../CHICK DATA FINAL POSITIONS/RepOnlyALLBIASEDBiasedPositionsChickeps0D10beta4nvalue1.csv')
-X = yourArray;
+# yourArray = readcsv('../CHICK DATA FINAL POSITIONS/RepOnlyALLBIASEDBiasedPositionsChickeps0D10beta4nvalue1.csv')
+# X = yourArray;
 
 
 #yourArray = readcsv('CoA CiL/PositionsCoACiL50D12nvalue5.csv')
-#yourArray = readcsv('positionsBreak.csv') # in thesis
-yourArray = readcsv('positionsVerycont.csv') # in thesis
+yourArray = readcsv('positionsBreak.csv') # in thesis
+#yourArray = readcsv('positionsVerycont.csv') # in thesis
 #yourArray = readcsv('positions.csv')
-#X = yourArray[:,[1,2]] # for positions break and very cont
 
 
-X = yourArray;
+X = yourArray[:,[1,2]] # for positions break and very cont
 
 
 # plt.scatter(X[:, 0], X[:, 1])
@@ -80,7 +79,8 @@ for k in range(1, 6):
      # set the xlim to left, right
     plt.xlim(left=0)
     plt.ylim(bottom=0)
-    plt.xticks(fontsize=2)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
     #plt.xlabel('k=' + str(k), fontsize=16)
     # if k == 1:
     #     plt.ylabel('Domain width, $\mu$m', fontsize=16)
@@ -89,6 +89,10 @@ for k in range(1, 6):
 # plt.tight_layout()
 
 plt.show()
+
+def compute_inertia(a, y):
+	W = [np.mean(pairwise_distances(y[a == c, :])) for c in np.unique(a)]
+	return np.mean(W)
 
 
 def Wk(mu, clusters):
@@ -107,35 +111,35 @@ def bounding_box(X):
 
 ## new version
 #
-def gap_statistic(X):
-    (xmin,xmax), (ymin,ymax) = bounding_box(X)
-        # Dispersion for real distribution
-    ks = range(1,10)
-    Wks = zeros(len(ks))
-    Wkbs = zeros(len(ks))
-    sk = zeros(len(ks))
-    for indk, k in enumerate(ks):
-        mu, clusters = find_centers(X,k)
-        Wks[indk] = np.log(Wk(mu, clusters))
-            # Create B reference datasets
-        B = 10
-        BWkbs = zeros(B)
-        for i in range(B):
-            Xb = []
-            for n in range(len(X)):
-                Xb.append([random.uniform(xmin,xmax),random.uniform(ymin,ymax)])
-            Xb = np.array(Xb)
-            mu, clusters = find_centers(Xb,k)
-            BWkbs[i] = np.log(Wk(mu, clusters))
-        Wkbs[indk] = sum(BWkbs)/B
-        sk[indk] = np.sqrt(sum((BWkbs-Wkbs[indk])**2)/B)
-    sk = sk*np.sqrt(1+1/B)
-    return(ks, Wks, Wkbs, sk)
-
-
-## EXAMPLE
-
-ks, logWks, logWkbs, sk = gap_statistic(X)
+# def gap_statistic(X):
+#     (xmin,xmax), (ymin,ymax) = bounding_box(X)
+#         # Dispersion for real distribution
+#     ks = range(1,10)
+#     Wks = zeros(len(ks))
+#     Wkbs = zeros(len(ks))
+#     sk = zeros(len(ks))
+#     for indk, k in enumerate(ks):
+#         mu, clusters = find_centers(X,k)
+#         Wks[indk] = np.log(Wk(mu, clusters))
+#             # Create B reference datasets
+#         B = 10
+#         BWkbs = zeros(B)
+#         for i in range(B):
+#             Xb = []
+#             for n in range(len(X)):
+#                 Xb.append([random.uniform(xmin,xmax),random.uniform(ymin,ymax)])
+#             Xb = np.array(Xb)
+#             mu, clusters = find_centers(Xb,k)
+#             BWkbs[i] = np.log(Wk(mu, clusters))
+#         Wkbs[indk] = sum(BWkbs)/B
+#         sk[indk] = np.sqrt(sum((BWkbs-Wkbs[indk])**2)/B)
+#     sk = sk*np.sqrt(1+1/B)
+#     return(ks, Wks, Wkbs, sk)
+#
+#
+# ## EXAMPLE
+#
+# ks, logWks, logWkbs, sk = gap_statistic(X)
 
 
  ## OLD VERSION
@@ -186,43 +190,43 @@ def compute_gap(clustering, data, k_max=5, n_references=5):
 
 k_max = 5
 #
-#         ## gap statistic
-# maximum = []
-# gap, reference_inertia, ondata_inertia = compute_gap(KMeans(), X, k_max)  # compute gap
+        ## gap statistic
+maximum = []
+gap, reference_inertia, ondata_inertia = compute_gap(KMeans(), X, k_max)  # compute gap
+
+maxind = np.argmax(gap)
+                # print('Max index', maxind)
+                # check if maximum is sufficiently significant
+if gap[maxind] < 0.1:
+    maximum.append(0)
+else:
+    maximum.append(maxind)
+
+#plot weights and gap
+plt.plot(range(1, k_max + 1), reference_inertia,
+		 '--o', label='reference')
+plt.plot(range(1, k_max + 1), ondata_inertia,
+		 '-o', label='data')
+plt.xlabel('k',fontsize = 16)
+plt.ylabel('log($W_k$)',fontsize = 16)
+plt.xticks(fontsize=16)
+plt.xticks(np.arange(0, 7, step=1))
+plt.yticks(fontsize=16)
+plt.grid(True)
+plt.legend(fontsize=16)
+plt.show()
 #
-# maxind = np.argmax(gap)
-#                 # print('Max index', maxind)
-#                 # check if maximum is sufficiently significant
-# if gap[maxind] < 0.1:
-#     maximum.append(0)
-# else:
-#     maximum.append(maxind)
 #
-# #plot weights and gap
-# plt.plot(range(1, k_max + 1), reference_inertia,
-# 		 '--o', label='reference')
-# plt.plot(range(1, k_max + 1), ondata_inertia,
-# 		 '-o', label='data')
-# plt.xlabel('k',fontsize = 16)
-# plt.ylabel('log($W_k$)',fontsize = 16)
-# plt.xticks(fontsize=16)
-# plt.xticks(np.arange(0, 7, step=1))
-# plt.yticks(fontsize=16)
-# plt.grid(True)
-# plt.legend(fontsize=16)
-# plt.show()
-# #
-# #
-# # plot gap
-# plt.plot(range(1, k_max+1), gap, '-o')
-# plt.ylabel('gap',fontsize = 16)
-# plt.xlabel('k', fontsize = 16)
-# # plt.ylim((-6.6,-5.5))
-# plt.xticks(fontsize=16)
-# plt.xticks(np.arange(0, 7, step=1))
-# plt.yticks(fontsize=16)
-# plt.grid(True)
-# plt.show()
+# plot gap
+plt.plot(range(1, k_max+1), gap, '-o')
+plt.ylabel('gap',fontsize = 16)
+plt.xlabel('k', fontsize = 16)
+# plt.ylim((-6.6,-5.5))
+plt.xticks(fontsize=16)
+plt.xticks(np.arange(0, 7, step=1))
+plt.yticks(fontsize=16)
+plt.grid(True)
+plt.show()
 
 
 
